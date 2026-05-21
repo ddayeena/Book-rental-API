@@ -56,3 +56,13 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+## API Documentation
+
+All endpoints are fully documented and ready for testing in Postman. 
+You can view the collection via the link below or import it directly into your workspace:
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/55006526/2sBXwjvZCG#b64af38c-daf2-4023-a133-ddb5639339cd)
+
+Or use the direct link: [Open Postman Collection](https://documenter.getpostman.com/view/55006526/2sBXwjvZCG#b64af38c-daf2-4023-a133-ddb5639339cd)
