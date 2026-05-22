@@ -1,20 +1,20 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
-    |
-    */
-
-    'failed' => 'These credentials do not match our records.',
-    'password' => 'The provided password is incorrect.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
-
+    'login_failed'           => 'Invalid email or password.',
+    'login_success'          => 'You have successfully logged in.',
+    'logout_success'         => 'You have successfully logged out.',
+    'register_success'       => 'Registration successful.',
+    'throttle'               => 'Too many login attempts. Please try again in :seconds seconds.',
+    'reset_subject'          => 'Password Reset Code',
+    'reset_title'            => 'Password Reset',
+    'reset_greeting'         => 'You are receiving this email because we received a password reset request for your account.',
+    'reset_code_intro'       => 'Here is your verification code:',
+    'reset_footer'           => 'This code is valid for 15 minutes. If you did not request a password reset, you can safely ignore this email.',
+    'reset_send'             => 'A password reset code has been sent to your email address.',
+    'reset_not_send'         => 'An error occurred while sending the code. Try again.',
+    'invalid_code'           => 'The code is invalid.',
+    'code_expired'           => 'The code has expired.',
+    'code_valid'             => 'The code is verified.',
+    'password_reset_success' => 'Your password has been successfully reset.',
 ];
