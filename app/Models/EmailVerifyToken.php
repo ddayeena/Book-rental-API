@@ -6,20 +6,18 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
-    'email',
-    'token',
+    'email', 
+    'token', 
     'created_at'
 ])]
-class PasswordResetToken extends Model
+class EmailVerifyToken extends Model
 {
-    protected $table = 'password_reset_tokens';
-
+    protected $table = 'email_verify_tokens';
+    
     protected $primaryKey = 'email';
-
     protected $keyType = 'string';
-
     public $incrementing = false;
-
+    
     public $timestamps = false;
 
     protected function casts(): array

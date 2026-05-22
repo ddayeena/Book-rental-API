@@ -17,4 +17,11 @@ return [
     'code_expired'           => 'The code has expired.',
     'code_valid'             => 'The code is verified.',
     'password_reset_success' => 'Your password has been successfully reset.',
+    'email_already_verified' => 'The email address is already verified.',
+    'email_verified_success' => 'The email address has been successfully verified.',
+    'verify_subject'         => 'Verify Email Mail',
+    'verify_title'           => 'Email Verification',
+    'verify_greeting'        => 'Thank you for registering!',
+    'verify_code_intro'      => 'To complete your account creation, please enter the following verification code in the application:',
+    'verify_footer'          => 'This code is valid for 24 hours. If you did not create an account, no further action is required.',
 ];
