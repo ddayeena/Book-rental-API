@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'forbidden'              => 'Доступ заборонено. У вас немає відповідних прав.',
     'login_failed'           => 'Невірний email або пароль.',
     'login_success'          => 'Ви успішно увійшли в систему.',
     'logout_success'         => 'Ви успішно вийшли з системи.',

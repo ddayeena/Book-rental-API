@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'forbidden'              => 'Access denied. You do not have the required permissions.',
     'login_failed'           => 'Invalid email or password.',
     'login_success'          => 'You have successfully logged in.',
     'logout_success'         => 'You have successfully logged out.',
