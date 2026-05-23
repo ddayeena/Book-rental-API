@@ -8,9 +8,16 @@ use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 Route::prefix('v1')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->name('register');
 
-    Route::post('/email/verify', [AuthController::class, 'verifyEmail'])
-        ->name('email.verify')
-        ->middleware('throttle:5,1');
+    Route::prefix('email')->group(function () {
+
+        Route::post('verify', [AuthController::class, 'verifyEmail'])
+            ->name('email.verify')
+            ->middleware('throttle:5,1');
+
+        Route::post('resend', [AuthController::class, 'resendVerifyCode'])
+            ->name('email.resend')
+            ->middleware('throttle:3,1');
+    });
 
     Route::post('login', [AuthController::class, 'login'])
         ->name('login')

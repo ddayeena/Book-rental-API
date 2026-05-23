@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Auth\LoginRequest;
 use App\Http\Requests\Api\v1\Auth\RegisterRequest;
+use App\Http\Requests\Api\v1\Auth\ResendVerifyCodeRequest;
 use App\Http\Requests\Api\v1\Auth\VerifyEmailCodeRequest;
 use App\Mail\VerifyEmailMail;
 use App\Models\EmailVerifyToken;
@@ -45,7 +46,7 @@ class AuthController extends Controller
 
         if (!$token)
             return $this->error(__('auth.invalid_code'), 400);
-        
+
         if ($token->created_at->diffInHours(now()) > 24) {
             return $this->error(__('auth.code_expired'), 400);
         }
@@ -59,6 +60,30 @@ class AuthController extends Controller
         $token->delete();
 
         return $this->success([], __('auth.email_verified_success'), 200);
+    }
+
+    public function resendVerifyCode(ResendVerifyCodeRequest $request)
+    {
+        $data = $request->validated();
+        $user = User::where('email', $data['email'])->first();
+
+        if ($user->email_verified_at !== null) {
+            return $this->success([], __('auth.email_already_verified'), 200);
+        }
+
+        $code = random_int(100000, 999999);
+
+        EmailVerifyToken::updateOrCreate(
+            ['email' => $user->email], 
+            [
+                'token'      => $code, 
+                'created_at' => now()  
+            ]
+        );
+
+        Mail::to($user->email)->send(new VerifyEmailMail($code));
+
+        return $this->success([], __('auth.verify_code_resent'), 200);
     }
 
     public function login(LoginRequest $request)
