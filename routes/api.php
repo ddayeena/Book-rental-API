@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\v1\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\Auth\AuthController;
@@ -34,7 +35,13 @@ Route::prefix('v1')->group(function () {
                 ->name('password-reset.reset');
         });
 
+    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        Route::prefix('admin')->middleware('role:admin')->group(function () {
+            Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
+        });
     });
 });

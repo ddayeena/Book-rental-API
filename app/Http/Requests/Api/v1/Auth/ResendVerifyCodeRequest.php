@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Api\v1\Auth;
 
+use App\Http\Requests\BaseRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ResendVerifyCodeRequest extends FormRequest
+class ResendVerifyCodeRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
