@@ -18,15 +18,6 @@ class UpdateCategoryRequest extends BaseRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->has('name') && empty($this->slug)) {
-            $this->merge([
-                'slug' => Str::slug($this->name)
-            ]);
-        }
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *

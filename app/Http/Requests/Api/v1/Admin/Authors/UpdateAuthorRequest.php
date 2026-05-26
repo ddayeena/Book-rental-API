@@ -16,14 +16,6 @@ class UpdateAuthorRequest extends BaseRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->has('name') && empty($this->input('slug'))) {
-            $this->merge([
-                'slug' => Str::slug($this->input('name'))
-            ]);
-        }
-    }
     /**
      * Get the validation rules that apply to the request.
      *
