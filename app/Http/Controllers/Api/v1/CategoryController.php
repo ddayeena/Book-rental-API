@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Filters\CategoryFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\Categories\StoreCategoryRequest;
 use App\Http\Requests\Api\v1\Admin\Categories\UpdateCategoryRequest;
@@ -14,10 +15,9 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(CategoryFilter $filter)
     {
-        $categories = Category::all();
-        
+        $categories = Category::filter($filter)->get();
         return $this->success(CategoryResource::collection($categories), '', 200);
     }
 

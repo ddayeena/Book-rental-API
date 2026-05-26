@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Filters\QueryFilter;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,4 +17,9 @@ class Category extends Model
 {
     use HasUlids;
     protected $table = 'categories';
+
+    public function scopeFilter(Builder $builder, QueryFilter $filter): Builder
+    {
+        return $filter->apply($builder);
+    }
 }
