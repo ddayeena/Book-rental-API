@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\Auth\AuthController;
 use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
+use App\Http\Controllers\Api\v1\AuthorController;
 
 Route::prefix('v1')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->name('register');
@@ -36,12 +37,14 @@ Route::prefix('v1')->group(function () {
         });
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+    Route::apiResource('authors', AuthorController::class)->only(['index', 'show']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
+            Route::apiResource('authors', AuthorController::class)->except(['index', 'show']);
         });
     });
 });

@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable([
     'name',
     'slug',
-    'description'
+    'bio'
 ])]
-class Category extends Model
+class Author extends Model
 {
     use HasUlids;
-    protected $table = 'categories';
+    protected $table = 'authors';
 
     public function scopeFilter(Builder $builder, QueryFilter $filter): Builder
     {
