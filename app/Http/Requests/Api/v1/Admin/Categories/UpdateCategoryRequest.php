@@ -29,17 +29,19 @@ class UpdateCategoryRequest extends BaseRequest
 
         return [
             'name' => [
+                'sometimes', 
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('categories', 'name')->ignore($categoryId)
             ],
             'description' => [
-                'nullable',
+                'nullable', 
                 'string',
                 'max:1000'
             ],
             'slug' => [
+                'sometimes', 
                 'required',
                 'string',
                 'max:255',

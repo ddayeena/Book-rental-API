@@ -27,18 +27,23 @@ class UpdateAuthorRequest extends BaseRequest
 
         return [
             'name' => [
+                'sometimes', 
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('authors', 'name')->ignore($author)
             ],
             'slug' => [
+                'sometimes', 
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('authors', 'slug')->ignore($author)
             ],
-            'bio' => ['nullable', 'string']
+            'bio' => [
+                'nullable', 
+                'string'
+            ]
         ];
     }
 }

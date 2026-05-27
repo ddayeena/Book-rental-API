@@ -6,7 +6,7 @@ use App\Filters\CategoryFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\Categories\StoreCategoryRequest;
 use App\Http\Requests\Api\v1\Admin\Categories\UpdateCategoryRequest;
-use App\Http\Resources\Api\v1\Admin\CategoryResource;
+use App\Http\Resources\Api\v1\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
