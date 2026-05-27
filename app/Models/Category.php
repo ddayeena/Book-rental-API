@@ -22,4 +22,9 @@ class Category extends Model
     {
         return $filter->apply($builder);
     }
+
+    public function books()
+    {
+        return $this->belongsToMany(Book::class, 'book_category');
+    }
 }
