@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Api\v1\Admin\Books;
 
+use App\Http\Resources\Api\v1\AuthorResource;
+use App\Http\Resources\Api\v1\CategoryResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +20,7 @@ class BookResource extends JsonResource
         return [
             'id'               => $this->id,
             'title'            => $this->title,
-            'cover_image_url'  => $this->cover_image ? Storage::disk('s3')->url($this->cover_image) : null,
+            'cover_image_url'  => $this->cover_image_url,
             'language'         => $this->language,
             'pages_count'      => $this->pages_count,
             'slug'             => $this->slug,

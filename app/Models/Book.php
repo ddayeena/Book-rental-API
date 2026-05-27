@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Filters\QueryFilter;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'title',
@@ -40,5 +42,12 @@ class Book extends Model
     public function authors()
     {
         return $this->belongsToMany(Author::class, 'author_book');
+    }
+
+    protected function coverImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->cover_image ? Storage::disk('s3')->url($this->cover_image) : null
+        );
     }
 }

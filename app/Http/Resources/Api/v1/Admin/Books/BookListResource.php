@@ -18,7 +18,7 @@ class BookListResource extends JsonResource
         return [
             'id'               => $this->id,
             'title'            => $this->title,
-            'cover_image_url'  => $this->cover_image ? Storage::disk('s3')->url($this->cover_image) : null,
+            'cover_image_url'  => $this->cover_image_url,
             'total_copies'     => $this->total_copies,
             'available_copies' => $this->available_copies,
             'daily_price'      => $this->daily_price,
