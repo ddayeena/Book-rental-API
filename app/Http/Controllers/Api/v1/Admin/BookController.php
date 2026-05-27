@@ -6,6 +6,7 @@ use App\Filters\Admin\BookFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\Books\BulkDeleteBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\BulkExportBooksRequest;
+use App\Http\Requests\Api\v1\Admin\Books\BulkImportBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\BulkUpdateActiveBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\BulkUpdatePriceBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\StoreBookRequest;
@@ -41,12 +42,11 @@ class BookController extends Controller
     {
         try {
             $book = $this->bookService->createBook(
-                $request->validated(), 
+                $request->validated(),
                 $request->file('cover_image')
             );
-            
+
             return $this->success(new BookResource($book), __('messages.created'), 201);
-            
         } catch (\Exception $e) {
             return $this->error(__('messages.creation_failed'), 500, ['error' => $e->getMessage()]);
         }
@@ -74,7 +74,6 @@ class BookController extends Controller
             );
 
             return $this->success(new BookResource($updatedBook), __('messages.updated'), 200);
-            
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
         }
@@ -87,9 +86,8 @@ class BookController extends Controller
     {
         try {
             $this->bookService->deleteBook($book);
-            
+
             return $this->success(null, __('messages.deleted'), 200);
-            
         } catch (\Exception $e) {
             return $this->error(__('messages.deletion_failed'), 500, ['error' => $e->getMessage()]);
         }
@@ -102,9 +100,8 @@ class BookController extends Controller
     {
         try {
             $report = $this->bookService->bulkDeleteBooks($request->input('ids'));
-            
+
             return $this->success($report, __('messages.deleted'), 200);
-            
         } catch (\Exception $e) {
             return $this->error(__('messages.deletion_failed'), 500, ['error' => $e->getMessage()]);
         }
@@ -120,9 +117,8 @@ class BookController extends Controller
                 $request->input('ids'),
                 $request->boolean('is_active')
             );
-            
+
             return $this->success(null, __('messages.updated'), 200);
-            
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
         }
@@ -139,19 +135,32 @@ class BookController extends Controller
                 $request->input('type'),
                 (float) $request->input('value')
             );
-            
+
             return $this->success(null, __('messages.updated'), 200);
-            
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
         }
     }
-    
+
     /**
      * Export multiple specified resources as a CSV file.
      */
     public function bulkExport(BulkExportBooksRequest $request): StreamedResponse
     {
         return $this->bookService->exportBooksToCsv($request->input('ids'));
+    }
+
+    /**
+     * Import multiple resources from a CSV file.
+     */
+    public function bulkImport(BulkImportBooksRequest $request)
+    {
+        try {
+            $report = $this->bookService->importBooksFromCsv($request->file('file'));
+
+            return $this->success($report, __('messages.updated'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
+        }
     }
 }

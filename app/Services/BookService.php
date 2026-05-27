@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Author;
 use App\Models\Book;
+use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Str;
 
 class BookService
 {
@@ -197,7 +200,7 @@ class BookService
                             $book->daily_price,
                             $book->available_copies,
                             $book->total_copies,
-                            $book->is_active ? '+' : '-',
+                            $book->is_active ? 'Active' : 'Not Active',
                             $book->description,
                         ], ';');
                     }
@@ -211,5 +214,89 @@ class BookService
             'Pragma' => 'no-cache',
             'Expires' => '0',
         ]);
+    }
+
+    /**
+     * Import books from a CSV file (insert new or update existing).
+     */
+    public function importBooksFromCsv(UploadedFile $file): array
+    {
+        $handle = fopen($file->getRealPath(), 'r');
+        
+        // Skip UTF-8 BOM if it exists
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        // Skip the header row
+        fgetcsv($handle, 0, ';');
+
+        $importedCount = 0;
+        $skippedCount = 0;
+
+        // Wrap the whole process in a transaction for safety
+        DB::transaction(function () use ($handle, &$importedCount, &$skippedCount) {
+            while (($row = fgetcsv($handle, 0, ';')) !== false) {
+                // Check: if the row is empty or if the book title is missing, skip it
+                if (empty($row[1])) {
+                    $skippedCount++;
+                    continue;
+                }
+
+                // Mapping columns according to our export:
+                // 0:ID, 1:Title, 2:Authors, 3:Categories, 4:Language, 5:Pages Count,
+                // 6:Publication Year, 7:ISBN, 8:Cover URL (skip), 9:Price, 10:Available, 11:Total, 12:Status, 13:Description
+
+                $bookId = !empty($row[0]) ? $row[0] : (string) Str::ulid();
+
+                $book = Book::updateOrCreate(
+                    ['id' => $bookId],
+                    [
+                        'title'            => $row[1],
+                        'language'         => $row[4] ?? 'uk',
+                        'pages_count'      => (int) ($row[5] ?? 0),
+                        'publication_year' => !empty($row[6]) ? (int) $row[6] : null,
+                        'isbn'             => $row[7] ?? null,
+                        'daily_price'      => (float) ($row[9] ?? 0.0),
+                        'available_copies' => (int) ($row[10] ?? 0),
+                        'total_copies'     => (int) ($row[11] ?? 0),
+                        'is_active'        => isset($row[12]) ? ($row[12] === 'Active') : true,
+                        'description'      => $row[13] ?? null,
+                    ]
+                );
+
+                // Sync authors (comma-separated in the file)
+                if (!empty($row[2])) {
+                    $authorNames = explode(',', $row[2]);
+                    $authorIds = [];
+                    foreach ($authorNames as $name) {
+                        $author = Author::firstOrCreate(['name' => trim($name)]);
+                        $authorIds[] = $author->id;
+                    }
+                    $book->authors()->sync($authorIds);
+                }
+
+                // Sync categories (comma-separated in the file)
+                if (!empty($row[3])) {
+                    $categoryNames = explode(',', $row[3]);
+                    $categoryIds = [];
+                    foreach ($categoryNames as $name) {
+                        $category = Category::firstOrCreate(['name' => trim($name)]);
+                        $categoryIds[] = $category->id;
+                    }
+                    $book->categories()->sync($categoryIds);
+                }
+
+                $importedCount++;
+            }
+        });
+
+        fclose($handle);
+
+        return [
+            'imported' => $importedCount,
+            'skipped'  => $skippedCount,
+        ];
     }
 }
