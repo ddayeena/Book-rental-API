@@ -57,6 +57,7 @@ Route::prefix('v1')->group(function () {
             Route::post('books/bulk-delete', [BookController::class, 'bulkDestroy'])->name('books.bulk-delete');
             Route::post('books/bulk-active', [BookController::class, 'bulkToggleActive'])->name('books.bulk-active');
             Route::post('books/bulk-price', [BookController::class, 'bulkUpdatePrice'])->name('books.bulk-price');
+            Route::post('books/bulk-export', [BookController::class, 'bulkExport'])->name('books.bulk-export'); 
             Route::apiResource('books', BookController::class);
         });
     });

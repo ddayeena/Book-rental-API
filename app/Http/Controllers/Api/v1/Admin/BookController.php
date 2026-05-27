@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Admin;
 use App\Filters\Admin\BookFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\Books\BulkDeleteBooksRequest;
+use App\Http\Requests\Api\v1\Admin\Books\BulkExportBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\BulkUpdateActiveBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\BulkUpdatePriceBooksRequest;
 use App\Http\Requests\Api\v1\Admin\Books\StoreBookRequest;
@@ -13,6 +14,7 @@ use App\Http\Resources\Api\v1\Admin\Books\BookListResource;
 use App\Http\Resources\Api\v1\Admin\Books\BookResource;
 use App\Models\Book;
 use App\Services\BookService;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookController extends Controller
 {
@@ -143,5 +145,13 @@ class BookController extends Controller
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
         }
+    }
+    
+    /**
+     * Export multiple specified resources as a CSV file.
+     */
+    public function bulkExport(BulkExportBooksRequest $request): StreamedResponse
+    {
+        return $this->bookService->exportBooksToCsv($request->input('ids'));
     }
 }
