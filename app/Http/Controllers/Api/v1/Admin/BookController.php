@@ -163,4 +163,40 @@ class BookController extends Controller
             return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Display a listing of the soft-deleted resources.
+     */
+    public function trash(BookFilter $filter)
+    {
+        $books = $this->bookService->getTrashedBooks($filter)->apiPaginate();
+        
+        return $this->respondWithPagination(BookListResource::collection($books));
+    }
+
+    /**
+     * Bulk restore soft-deleted resources.
+     */
+    public function bulkRestore(BulkDeleteBooksRequest $request)
+    {
+        try {
+            $this->bookService->bulkRestoreBooks($request->input('ids'));
+            return $this->success(null, __('messages.updated'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.update_failed'), 500, ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Bulk permanently delete resources.
+     */
+    public function bulkForceDelete(BulkDeleteBooksRequest $request)
+    {
+        try {
+            $this->bookService->bulkForceDeleteBooks($request->input('ids'));
+            return $this->success(null, __('messages.deleted'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.deletion_failed'), 500, ['error' => $e->getMessage()]);
+        }
+    }
 }

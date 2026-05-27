@@ -48,18 +48,27 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-        
+
         // Admin Panel API
         Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
             Route::apiResource('authors', AuthorController::class)->except(['index', 'show']);
 
-            Route::post('books/bulk-delete', [BookController::class, 'bulkDestroy'])->name('books.bulk-delete');
-            Route::post('books/bulk-active', [BookController::class, 'bulkToggleActive'])->name('books.bulk-active');
-            Route::post('books/bulk-price', [BookController::class, 'bulkUpdatePrice'])->name('books.bulk-price');
-            Route::post('books/bulk-export', [BookController::class, 'bulkExport'])->name('books.bulk-export'); 
-            Route::post('books/bulk-import', [BookController::class, 'bulkImport'])->name('books.bulk-import'); 
-            Route::apiResource('books', BookController::class);
+            // Books
+            Route::prefix('books')->controller(BookController::class)->group(function () {
+                // Trash and Restore
+                Route::get('trash', 'trash')->name('books.trash');
+                Route::post('bulk-restore', 'bulkRestore')->name('books.bulk-restore');
+                Route::post('bulk-force-delete', 'bulkForceDelete')->name('books.bulk-force-delete');
+        
+                // Bulk Actions
+                Route::post('bulk-delete', 'bulkDestroy')->name('books.bulk-delete');
+                Route::post('bulk-active', 'bulkToggleActive')->name('books.bulk-active');
+                Route::post('bulk-price', 'bulkUpdatePrice')->name('books.bulk-price');
+                Route::post('bulk-export', 'bulkExport')->name('books.bulk-export');
+                Route::post('bulk-import', 'bulkImport')->name('books.bulk-import');
+            });
+            Route::apiResource('books', BookController::class)->withTrashed(['show', 'update']);
         });
     });
 });

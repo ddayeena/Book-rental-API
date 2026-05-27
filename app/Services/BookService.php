@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Filters\Admin\BookFilter;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
@@ -174,12 +175,12 @@ class BookService
                 'Pages Count',
                 'Publication Year',
                 'ISBN',
-                'Cover Image URL', 
+                'Cover Image URL',
                 'Daily Price',
                 'Available Copies',
                 'Total Copies',
                 'Status',
-                'Description' 
+                'Description'
             ], ';');
 
             // Stream records in chunks to prevent memory exhaustion
@@ -222,7 +223,7 @@ class BookService
     public function importBooksFromCsv(UploadedFile $file): array
     {
         $handle = fopen($file->getRealPath(), 'r');
-        
+
         // Skip UTF-8 BOM if it exists
         $bom = fread($handle, 3);
         if ($bom !== "\xEF\xBB\xBF") {
@@ -298,5 +299,29 @@ class BookService
             'imported' => $importedCount,
             'skipped'  => $skippedCount,
         ];
+    }
+
+    /**
+     * Get only soft-deleted books with pagination.
+     */
+    public function getTrashedBooks(BookFilter $filter)
+    {
+        return Book::onlyTrashed()->with(['authors', 'categories'])->filter($filter);
+    }
+
+    /**
+     * Bulk restore soft-deleted books.
+     */
+    public function bulkRestoreBooks(array $ids): void
+    {
+        Book::onlyTrashed()->whereIn('id', $ids)->restore();
+    }
+
+    /**
+     * Bulk permanently delete books from database.
+     */
+    public function bulkForceDeleteBooks(array $ids): void
+    {
+        Book::onlyTrashed()->whereIn('id', $ids)->forceDelete();
     }
 }
