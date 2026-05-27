@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Api\v1\Admin\Books;
 
+use App\Http\Requests\BaseRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-class BulkUpdateActiveBooksRequest extends FormRequest
+class BulkUpdateActiveBooksRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
