@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\v1\Admin\Authors;
+namespace App\Http\Requests\Api\v1\Admin\Books;
 
 use App\Http\Requests\BaseRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 
-class StoreAuthorRequest extends BaseRequest
+class BulkImportBooksRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,7 +15,6 @@ class StoreAuthorRequest extends BaseRequest
         return true;
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,19 +23,12 @@ class StoreAuthorRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => [
+            'file' => [
                 'required',
-                'string',
-                'max:255',
-                'unique:authors,name'
+                'file',
+                'mimes:csv,txt',
+                'max:10240', 
             ],
-            'slug' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:authors,slug'
-            ],
-            'bio'  => ['nullable', 'string'],
         ];
     }
 }

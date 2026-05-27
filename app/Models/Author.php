@@ -22,4 +22,9 @@ class Author extends Model
     {
         return $filter->apply($builder);
     }
+
+    public function books()
+    {
+        return $this->belongsToMany(Book::class, 'author_book');
+    }
 }

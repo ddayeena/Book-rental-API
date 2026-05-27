@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\v1\Admin\Categories;
+namespace App\Http\Requests\Api\v1\Admin\Books;
 
 use App\Http\Requests\BaseRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 
-class StoreCategoryRequest extends BaseRequest
+class BulkUpdateActiveBooksRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,22 +23,18 @@ class StoreCategoryRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name'        => [
+            'ids' => [
                 'required',
-                'string',
-                'max:255',
-                'unique:categories,name'
+                'array',
+                'min:1'
             ],
-            'description' => [
-                'nullable',
-                'string',
-                'max:1000'
+            'ids.*' => [
+                'ulid',
+                'exists:books,id'
             ],
-            'slug'        => [
+            'is_active' => [
                 'required',
-                'string',
-                'max:255',
-                'unique:categories,slug'
+                'boolean'
             ],
         ];
     }

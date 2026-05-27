@@ -16,14 +16,6 @@ class UpdateAuthorRequest extends BaseRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->has('name') && empty($this->input('slug'))) {
-            $this->merge([
-                'slug' => Str::slug($this->input('name'))
-            ]);
-        }
-    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -35,18 +27,23 @@ class UpdateAuthorRequest extends BaseRequest
 
         return [
             'name' => [
+                'sometimes', 
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('authors', 'name')->ignore($author)
             ],
             'slug' => [
+                'sometimes', 
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('authors', 'slug')->ignore($author)
             ],
-            'bio' => ['nullable', 'string']
+            'bio' => [
+                'nullable', 
+                'string'
+            ]
         ];
     }
 }
