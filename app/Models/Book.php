@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 #[Fillable([
     'title',
@@ -35,6 +36,19 @@ class Book extends Model
         'language' => BookLanguage::class, 
         'is_active' => 'boolean',
     ];
+
+
+    protected static function booted(): void
+    {
+        // 
+        $clearCatalogCache = function () {
+            Cache::tags(['public_catalog'])->flush(); 
+        };
+
+        static::saved($clearCatalogCache);
+        static::deleted($clearCatalogCache);
+        static::restored($clearCatalogCache);
+    }
 
     public function scopeActive(Builder $query): Builder
     {

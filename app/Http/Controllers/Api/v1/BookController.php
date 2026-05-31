@@ -8,6 +8,7 @@ use App\Http\Resources\Api\v1\Book\BookListResource;
 use App\Http\Resources\Api\v1\Book\BookResource;
 use App\Models\Book;
 use App\Services\BookService;
+use Illuminate\Support\Facades\Cache;
 
 class BookController extends Controller
 {
@@ -20,8 +21,17 @@ class BookController extends Controller
      */
     public function index(BookFilter $filter)
     {
-        $books = $this->bookService->getPublicBooks($filter)->apiPaginate();
-        return $this->respondWithPagination(BookListResource::collection($books));
+        $cacheKey = 'client_books_' . md5(request()->fullUrl());
+
+        $jsonString = Cache::tags(['public_catalog'])
+            ->remember($cacheKey, now()->addMinutes(15), function () use ($filter) {
+
+                $books = $this->bookService->getPublicBooks($filter)->apiPaginate();
+                $response = $this->respondWithPagination(BookListResource::collection($books));
+                return $response->getContent();
+            });
+
+        return response($jsonString, 200, ['Content-Type' => 'application/json']);
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Str;
 
@@ -330,7 +331,7 @@ class BookService
      */
     public function getPublicBooks($filter)
     {
-        return Book::active() 
+        return Book::active()
             ->with(['authors', 'categories'])
             ->filter($filter);
     }
@@ -340,7 +341,7 @@ class BookService
      */
     public function getPublicBookById(string $id): Book
     {
-        return Book::active() 
+        return Book::active()
             ->with(['authors', 'categories'])
             ->findOrFail($id);
     }
@@ -359,7 +360,7 @@ class BookService
             })
             ->with(['authors', 'categories'])
             // Randomize the order of related books to provide variety in recommendations
-            ->inRandomOrder() 
+            ->inRandomOrder()
             ->limit($limit)
             ->get();
     }
