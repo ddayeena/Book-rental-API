@@ -324,4 +324,43 @@ class BookService
     {
         Book::onlyTrashed()->whereIn('id', $ids)->forceDelete();
     }
+
+    /**
+     * Get active books for public catalog with filtering and pagination.
+     */
+    public function getPublicBooks($filter)
+    {
+        return Book::active() 
+            ->with(['authors', 'categories'])
+            ->filter($filter);
+    }
+
+    /**
+     * Get active book by ID for public view.
+     */
+    public function getPublicBookById(string $id): Book
+    {
+        return Book::active() 
+            ->with(['authors', 'categories'])
+            ->findOrFail($id);
+    }
+
+    /**
+     * Get related active books based on shared categories.
+     */
+    public function getRelatedBooks(Book $book, int $limit = 4)
+    {
+        return Book::active()
+            // Exclude the current book from recommendations to avoid recommending itself
+            ->where('id', '!=', $book->id)
+            // Find books that share at least one category with the current book
+            ->whereHas('categories', function ($query) use ($book) {
+                $query->whereIn('categories.id', $book->categories->pluck('id'));
+            })
+            ->with(['authors', 'categories'])
+            // Randomize the order of related books to provide variety in recommendations
+            ->inRandomOrder() 
+            ->limit($limit)
+            ->get();
+    }
 }

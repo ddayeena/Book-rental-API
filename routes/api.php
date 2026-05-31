@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\v1\Admin\BookController;
+use App\Http\Controllers\Api\v1\BookController as PublicBookController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,12 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('authors', AuthorController::class)->only(['index', 'show']);
 
 
+    Route::prefix('books')->controller(PublicBookController::class)->group(function () {
+        Route::get('', 'index')->name('books.index');
+        Route::get('{id}', 'show')->name('books.show');
+        Route::get('{book}/related', 'related')->name('books.related');
+    });
+    
     // Protected API
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
