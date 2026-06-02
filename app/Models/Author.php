@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 #[Fillable([
     'name',
@@ -26,5 +27,16 @@ class Author extends Model
     public function books()
     {
         return $this->belongsToMany(Book::class, 'author_book');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            Cache::tags(['categories'])->flush();
+        });
+
+        static::deleted(function () {
+            Cache::tags(['categories'])->flush();
+        });
     }
 }

@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Admin\BookController;
-use App\Http\Controllers\Api\v1\BookController as PublicBookController;
-use App\Http\Controllers\Api\v1\CategoryController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\Auth\AuthController;
+use App\Http\Controllers\Api\v1\Admin\BookController;
+use App\Http\Controllers\Api\v1\BookController as PublicBookController;
+use App\Http\Controllers\Api\v1\Admin\CategoryController;
+use App\Http\Controllers\Api\v1\CategoryController as PublicCategoryController;
 use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
-use App\Http\Controllers\Api\v1\AuthorController;
+use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
+use App\Http\Controllers\Api\v1\Admin\AuthorController;
 
 Route::prefix('v1')->group(function () {
 
@@ -41,8 +42,8 @@ Route::prefix('v1')->group(function () {
 
 
     // Public API
-    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
-    Route::apiResource('authors', AuthorController::class)->only(['index', 'show']);
+    Route::apiResource('categories', PublicCategoryController::class)->only(['index', 'show']);
+    Route::apiResource('authors', PublicAuthorController::class)->only(['index', 'show']);
 
 
     Route::prefix('books')->controller(PublicBookController::class)->group(function () {
@@ -58,8 +59,8 @@ Route::prefix('v1')->group(function () {
 
         // Admin Panel API
         Route::prefix('admin')->middleware('role:admin')->group(function () {
-            Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
-            Route::apiResource('authors', AuthorController::class)->except(['index', 'show']);
+            Route::apiResource('categories', CategoryController::class);
+            Route::apiResource('authors', AuthorController::class);
 
             // Books
             Route::prefix('books')->controller(BookController::class)->group(function () {
