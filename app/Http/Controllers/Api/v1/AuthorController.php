@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Filters\AuthorFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\v1\Admin\Authors\StoreAuthorRequest;
-use App\Http\Requests\Api\v1\Admin\Authors\UpdateAuthorRequest;
 use App\Http\Resources\Api\v1\AuthorResource;
 use App\Models\Author;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class AuthorController extends Controller
 {
@@ -18,17 +16,17 @@ class AuthorController extends Controller
      */
     public function index(AuthorFilter $filter)
     {
-        $authors = Author::filter($filter)->apiPaginate(); 
-        return $this->respondWithPagination(AuthorResource::collection($authors));
-    }
+        $cacheKey = 'client_authors_' . md5(request()->fullUrl());
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreAuthorRequest $request)
-    {
-        $author = Author::create($request->validated());
-        return $this->success(new AuthorResource($author), __('messages.created'), 201);
+        $jsonString = Cache::tags(['authors'])
+            ->remember($cacheKey, now()->addDay(), function () use ($filter) {
+                
+                $authors = Author::filter($filter)->apiPaginate();
+                $response = $this->respondWithPagination(AuthorResource::collection($authors));
+                return $response->getContent();
+            });
+
+        return response($jsonString, 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -37,23 +35,5 @@ class AuthorController extends Controller
     public function show(Author $author)
     {
         return $this->success(new AuthorResource($author), '', 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateAuthorRequest $request, Author $author)
-    {
-        $author->update($request->validated());
-        return $this->success(new AuthorResource($author), __('messages.updated'), 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Author $author)
-    {
-        $author->delete();
-        return $this->success(null, __('messages.deleted'), 200);
     }
 }

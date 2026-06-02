@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Filters\CategoryFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\v1\Admin\Categories\StoreCategoryRequest;
-use App\Http\Requests\Api\v1\Admin\Categories\UpdateCategoryRequest;
 use App\Http\Resources\Api\v1\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
@@ -17,17 +16,17 @@ class CategoryController extends Controller
      */
     public function index(CategoryFilter $filter)
     {
-        $categories = Category::filter($filter)->get();
-        return $this->success(CategoryResource::collection($categories), '', 200);
-    }
+        $cacheKey = 'client_categories_' . md5(request()->fullUrl());
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCategoryRequest $request)
-    {
-        $category = Category::create($request->validated());
-        return $this->success(new CategoryResource($category), __('messages.created'), 201);
+        $jsonString = Cache::tags(['categories'])
+            ->remember($cacheKey, now()->addDay(), function () use ($filter) {
+                
+                $categories = Category::filter($filter)->get();
+                $response = $this->success(CategoryResource::collection($categories), '', 200);
+                return $response->getContent();
+            });
+
+        return response($jsonString, 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -36,23 +35,5 @@ class CategoryController extends Controller
     public function show(Category $category)
     {
         return $this->success(new CategoryResource($category), '', 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCategoryRequest $request, Category $category)
-    {
-        $category->update($request->validated());
-        return $this->success(new CategoryResource($category), __('messages.updated'), 200);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Category $category)
-    {
-        $category->delete();
-        return $this->success(null, __('messages.deleted'), 200);
     }
 }
