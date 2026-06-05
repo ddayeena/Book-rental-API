@@ -9,6 +9,9 @@ return [
     'deletion_failed'   => 'Deletion failed.',
     'not_found'         => 'Not found.',
     'empty'             => 'No data available.',
-    
-    'error_below_zero'  => 'The price for fixed type cannot be negative.'
+
+    'error_below_zero'  => 'The price for fixed type cannot be negative.',
+
+    'book_unavailable'       => 'This book is currently unavailable for rental.',
+    'rental_period_exceeded' => 'The maximum rental period is :days days.',    
 ];

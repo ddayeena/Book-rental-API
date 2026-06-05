@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v1\CategoryController as PublicCategoryController;
 use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
 use App\Http\Controllers\Api\v1\Admin\AuthorController;
+use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
 
 Route::prefix('v1')->group(function () {
 
@@ -56,6 +57,9 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
+        // Rental
+        Route::get('rentals/statuses', [PublicRentalController::class, 'statuses']);
+        Route::apiResource('rentals', PublicRentalController::class)->only('index','show','store');
 
         // Admin Panel API
         Route::prefix('admin')->middleware('role:admin')->group(function () {
