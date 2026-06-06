@@ -73,12 +73,12 @@ class RentalController extends Controller
                 'value' => $status->value,
                 'label' => $status->label(),
             ], RentalStatus::cases()),
-            
+
             'payment_methods' => array_map(fn($method) => [
                 'value' => $method->value,
                 'label' => $method->label(),
             ], PaymentMethod::cases()),
-            
+
             'payment_statuses' => array_map(fn($status) => [
                 'value' => $status->value,
                 'label' => $status->label(),
@@ -88,5 +88,23 @@ class RentalController extends Controller
         return $this->success($data, '', 200);
     }
 
-    
+    /**
+     * Cancel a pending rental order.
+     */
+    public function cancel(string $id, Request $request)
+    {
+        try {
+            $rental = $request->user()->rentals()->findOrFail($id);
+
+            $rental = $this->rentalService->cancelRental($rental);
+
+            $message = $rental->payment_status === PaymentStatus::REFUNDED
+                ? __('messages.refund_initiated')
+                : __('messages.canceled');
+
+            return $this->success(new RentalResource($rental), $message, 200);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
 }

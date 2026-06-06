@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RentalService
 {
@@ -29,7 +30,7 @@ class RentalService
     public function createRental(User $user, array $data): Rental
     {
         return DB::transaction(function () use ($user, $data) {
-            
+
             // Find the requested book and lock the row to prevent race conditions
             $book = Book::where('id', $data['book_id'])->lockForUpdate()->firstOrFail();
 
@@ -40,13 +41,13 @@ class RentalService
             // Calculate the duration of the rental.
             $startDate = Carbon::parse($data['start_date']);
             $endDate = Carbon::parse($data['end_date']);
-            
+
             // If the book is rented and returned on the same day, count it as a 1-day rental.
             $days = $startDate->diffInDays($endDate);
             $days = $days === 0 ? 1 : $days;
 
             // Calculate financial metrics.
-            $dailyPrice = $book->daily_price ?? 0; 
+            $dailyPrice = $book->daily_price ?? 0;
             $totalPrice = $days * $dailyPrice;
 
             $rental = Rental::create([
@@ -66,10 +67,38 @@ class RentalService
 
             if ($rental->payment_method === PaymentMethod::PAY_ONLINE) {
                 $checkoutUrl = $this->paymentService->generateCheckoutUrl($rental);
-                
+
                 $rental->checkout_url = $checkoutUrl;
             }
             return $rental;
         });
+    }
+
+    /**
+     * Cancel a pending rental order.
+     *
+     * @param Rental $rental
+     * @return Rental
+     * @throws \Exception
+     */
+    public function cancelRental(Rental $rental): Rental
+    {
+        if ($rental->status !== RentalStatus::PENDING) {
+            throw new \Exception(__('messages.not_canceled'));
+        }
+
+        $updateData = [
+            'status' => RentalStatus::CANCELLED,
+        ];
+
+        if ($rental->payment_status === PaymentStatus::PAID) {
+            $updateData['payment_status'] = PaymentStatus::REFUNDED;
+
+            Log::warning("Rental {$rental->id} was cancelled by user AFTER payment. Manual refund required.");
+        }
+
+        $rental->update($updateData);
+
+        return $rental;
     }
 }

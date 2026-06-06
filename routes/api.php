@@ -65,6 +65,7 @@ Route::prefix('v1')->group(function () {
 
         // Rental
         Route::apiResource('rentals', PublicRentalController::class)->only('index','show','store');
+        Route::patch('rentals/{id}/cancel', [PublicRentalController::class, 'cancel'])->name('rentals.cancel');
 
         // Admin Panel API
         Route::prefix('admin')->middleware('role:admin')->group(function () {

@@ -10,6 +10,7 @@ enum RentalStatus: string
     case COMPLETED = 'completed';
     case CANCELLED = 'cancelled';
     case LOST      = 'lost';
+    case CANCELED  = 'canceled';
 
     public function label(): string
     {
@@ -20,6 +21,7 @@ enum RentalStatus: string
             self::COMPLETED => 'Завершена',
             self::CANCELLED => 'Скасована',
             self::LOST      => 'Втрачена',
+            self::CANCELED  => 'Скасована',
         };
     }
 }
