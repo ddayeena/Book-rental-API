@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\RentalStatus;
 use App\Filters\QueryFilter;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -22,6 +24,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'daily_price',
     'status',
     'notes',
+    'payment_method',
+    'payment_status',
+    'transaction_id',
 )]
 class Rental extends Model
 {
@@ -34,6 +39,8 @@ class Rental extends Model
             'end_date'    => 'date',
             'returned_at' => 'datetime',
             'status'      => RentalStatus::class,
+            'payment_method' => PaymentMethod::class,
+            'payment_status' => PaymentStatus::class,
         ];
     }
 

@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Api\v1;
 
+use App\Enums\PaymentMethod;
 use App\Http\Requests\BaseRequest;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 
 class StoreRentalRequest extends BaseRequest
 {
@@ -60,10 +62,15 @@ class StoreRentalRequest extends BaseRequest
                 },
             ],
 
-            'note' => [
+            'notes' => [
                 'nullable',
                 'string',
-            ]
+            ],
+
+            'payment_method' => [
+                'required',
+                Rule::enum(PaymentMethod::class)
+            ],
 
         ];
     }

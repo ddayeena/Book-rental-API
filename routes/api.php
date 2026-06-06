@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
 use App\Http\Controllers\Api\v1\Admin\AuthorController;
 use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
+use App\Http\Controllers\Api\v1\WebhookController;
 
 Route::prefix('v1')->group(function () {
 
@@ -46,19 +47,22 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('categories', PublicCategoryController::class)->only(['index', 'show']);
     Route::apiResource('authors', PublicAuthorController::class)->only(['index', 'show']);
 
-
+    // Books
     Route::prefix('books')->controller(PublicBookController::class)->group(function () {
         Route::get('', 'index')->name('books.index');
         Route::get('{id}', 'show')->name('books.show');
         Route::get('{book}/related', 'related')->name('books.related');
     });
     
+    // Liqpay Webhook
+    Route::post('webhooks/liqpay', [WebhookController::class, 'liqpay'])->name('webhooks.liqpay');
+
     // Protected API
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         // Rental
-        Route::get('rentals/statuses', [PublicRentalController::class, 'statuses']);
+        Route::get('rentals/statuses', [PublicRentalController::class, 'statuses'])->name('rentals.statuses');
         Route::apiResource('rentals', PublicRentalController::class)->only('index','show','store');
 
         // Admin Panel API

@@ -43,7 +43,7 @@ class RentalController extends Controller
                 $request->validated()
             );
 
-            return $this->success(($rental), __('messages.created'), 201);
+            return $this->success(new RentalResource($rental), __('messages.created'), 201);
         } catch (Exception $e) {
             return $this->error(__('messages.creation_failed'), 400, $e->getMessage());
         }

@@ -27,6 +27,12 @@ class RentalListResource extends JsonResource
             
             'status'       => $this->status->value,
             'status_label' => $this->status->label(),
+
+            // Payment details
+            'payment_method'       => $this->payment_method->value,
+            'payment_method_label' => $this->payment_method->label(),
+            'payment_status'       => $this->payment_status->value,
+            'payment_status_label' => $this->payment_status->label(),
         ];
     }
 }

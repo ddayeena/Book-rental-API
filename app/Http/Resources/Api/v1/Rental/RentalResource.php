@@ -30,7 +30,15 @@ class RentalResource extends JsonResource
             
             'status'       => $this->status?->value,
             'status_label' => $this->status?->label(),
+
+            // Payment details
+            'payment_method'       => $this->payment_method->value,
+            'payment_method_label' => $this->payment_method->label(),
+            'payment_status'       => $this->payment_status->value,
+            'payment_status_label' => $this->payment_status->label(),
             
+            'checkout_url'         => $this->checkout_url ?? null,
+
             'notes'        => $this->notes,
             'created_at'   => $this->created_at->toIso8601String(),
         ];

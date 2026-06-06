@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
+use App\Enums\RentalStatus;
 use App\Models\Book;
 use App\Models\Rental;
 use App\Models\User;
@@ -11,6 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class RentalService
 {
+    public function __construct(
+        protected PaymentService $paymentService
+    ) {}
+
     /**
      * Create a new rental order.
      *
@@ -43,16 +50,25 @@ class RentalService
             $totalPrice = $days * $dailyPrice;
 
             $rental = Rental::create([
-                'user_id'     => $user->id,
-                'book_id'     => $book->id,
-                'start_date'  => $startDate,
-                'end_date'    => $endDate,
-                'daily_price' => $dailyPrice,
-                'total_price' => $totalPrice,
+                'user_id'        => $user->id,
+                'book_id'        => $book->id,
+                'start_date'     => $startDate,
+                'end_date'       => $endDate,
+                'daily_price'    => $dailyPrice,
+                'total_price'    => $totalPrice,
+                'notes'          => $data['notes'] ?? null,
+                'payment_method' => $data['payment_method'],
+                'status'         => RentalStatus::PENDING,
+                'payment_status' => PaymentStatus::PENDING,
             ]);
 
             $book->decrement('available_copies');
 
+            if ($rental->payment_method === PaymentMethod::PAY_ONLINE) {
+                $checkoutUrl = $this->paymentService->generateCheckoutUrl($rental);
+                
+                $rental->checkout_url = $checkoutUrl;
+            }
             return $rental;
         });
     }
