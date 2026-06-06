@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\RentalStatus;
 use App\Filters\RentalFilter;
 use App\Http\Controllers\Controller;
@@ -61,16 +63,30 @@ class RentalController extends Controller
         return $this->success(new RentalResource($rental), '', 200);
     }
 
-    /*
-    * Rental statuses.
-    */
-    public function statuses()
+    /**
+     * Get all dictionaries/enums related to rentals for the frontend.
+     */
+    public function dictionaries()
     {
-        $statuses = array_map(fn($status) => [
-            'value' => $status->value,
-            'label' => $status->label(),
-        ], RentalStatus::cases());
+        $data = [
+            'rental_statuses' => array_map(fn($status) => [
+                'value' => $status->value,
+                'label' => $status->label(),
+            ], RentalStatus::cases()),
+            
+            'payment_methods' => array_map(fn($method) => [
+                'value' => $method->value,
+                'label' => $method->label(),
+            ], PaymentMethod::cases()),
+            
+            'payment_statuses' => array_map(fn($status) => [
+                'value' => $status->value,
+                'label' => $status->label(),
+            ], PaymentStatus::cases()),
+        ];
 
-        return $this->success($statuses, '', 200);
+        return $this->success($data, '', 200);
     }
+
+    
 }

@@ -47,6 +47,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('categories', PublicCategoryController::class)->only(['index', 'show']);
     Route::apiResource('authors', PublicAuthorController::class)->only(['index', 'show']);
 
+    Route::get('rentals/dictionaries', [PublicRentalController::class, 'dictionaries'])->name('rentals.dictionaries');
+
     // Books
     Route::prefix('books')->controller(PublicBookController::class)->group(function () {
         Route::get('', 'index')->name('books.index');
@@ -62,7 +64,6 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         // Rental
-        Route::get('rentals/statuses', [PublicRentalController::class, 'statuses'])->name('rentals.statuses');
         Route::apiResource('rentals', PublicRentalController::class)->only('index','show','store');
 
         // Admin Panel API

@@ -22,7 +22,7 @@ class WebhookController extends Controller
         $signature = $request->input('signature');
 
         if (!$data || !$signature) {
-            return $this->error('Bad request', 400); 
+            return $this->error('Bad request', 400);
         }
 
         $payload = $this->paymentService->handleWebhook($data, $signature);
@@ -32,18 +32,31 @@ class WebhookController extends Controller
             return $this->error('Invalid signature', 403);
         }
 
+        // Liqpay statuses
         $successStatuses = ['success', 'sandbox'];
+        $failedStatuses = ['failure', 'error'];
 
-        if (in_array($payload['status'], $successStatuses)) {
-            $rental = Rental::find($payload['order_id']);
+        $rental = Rental::find($payload['order_id']);
 
-            if ($rental && $rental->payment_status !== PaymentStatus::PAID) {
-                $rental->update([
-                    'payment_status' => PaymentStatus::PAID,
-                    'transaction_id' => $payload['payment_id'] ?? null, 
-                ]);
-
-                Log::info("Rental {$rental->id} paid successfully via LiqPay.");
+        if ($rental) {
+            // If payment was successful, update the rental status to PAID
+            if (in_array($payload['status'], $successStatuses)) {
+                if ($rental->payment_status !== PaymentStatus::PAID) {
+                    $rental->update([
+                        'payment_status' => PaymentStatus::PAID,
+                        'transaction_id' => $payload['payment_id'] ?? null,
+                    ]);
+                    Log::info("Rental {$rental->id} paid successfully via LiqPay.");
+                }
+            }
+            // if payment failed, update the rental status to FAILED only if it was still PENDING
+            elseif (in_array($payload['status'], $failedStatuses)) {
+                if ($rental->payment_status === PaymentStatus::PENDING) {
+                    $rental->update([
+                        'payment_status' => PaymentStatus::FAILED,
+                    ]);
+                    Log::warning("Rental {$rental->id} payment failed. Reason: " . ($payload['err_description'] ?? 'Unknown'));
+                }
             }
         }
 
