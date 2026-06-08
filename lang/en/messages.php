@@ -17,4 +17,8 @@ return [
     'not_canceled'           => 'Only pending rentals can be canceled.',
     'canceled'               => 'Rental order canceled successfully.',
     'refund_initiated'       => 'Rental order canceled. Refund will be processed by the manager later.',
+    
+    'cannot_update_closed_rental' => 'You can not update closed rental.',
+    'cannot_change_dates_for_paid'=> 'You can not update date for paid rentals.',
+    'cannot_change_payment_method_for_paid' => 'You can not update payment method for paid rental.'
 ];

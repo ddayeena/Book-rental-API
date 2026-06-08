@@ -29,7 +29,7 @@ class BookResource extends JsonResource
             'isbn'             => $this->isbn,
             'total_copies'     => $this->total_copies,
             'available_copies' => $this->available_copies,
-            'daily_price'      => $this->daily_price,
+            'daily_price'      => (float) $this->daily_price,
             'is_active'        => $this->is_active,
             'categories'       => CategoryResource::collection($this->whenLoaded('categories')),
             'authors'          => AuthorResource::collection($this->whenLoaded('authors')),

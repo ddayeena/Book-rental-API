@@ -21,7 +21,7 @@ class BookListResource extends JsonResource
             'cover_image_url'  => $this->cover_image_url,
             'total_copies'     => $this->total_copies,
             'available_copies' => $this->available_copies,
-            'daily_price'      => $this->daily_price,
+            'daily_price'      => (float) $this->daily_price,
             'is_active'        => $this->is_active,
             'categories' => $this->whenLoaded('categories', function () {
                 return $this->categories->map(fn($category) => [

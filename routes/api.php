@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v1\CategoryController as PublicCategoryController;
 use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
 use App\Http\Controllers\Api\v1\Admin\AuthorController;
+use App\Http\Controllers\Api\v1\Admin\RentalController;
 use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
 use App\Http\Controllers\Api\v1\WebhookController;
 
@@ -71,6 +72,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('authors', AuthorController::class);
+            Route::apiResource('rentals', RentalController::class);
 
             // Books
             Route::prefix('books')->controller(BookController::class)->group(function () {

@@ -57,10 +57,10 @@ class RentalService
                 'end_date'       => $endDate,
                 'daily_price'    => $dailyPrice,
                 'total_price'    => $totalPrice,
-                'notes'          => $data['notes'] ?? null,
                 'payment_method' => $data['payment_method'],
-                'status'         => RentalStatus::PENDING,
-                'payment_status' => PaymentStatus::PENDING,
+                'status'         => $data['status'] ?? RentalStatus::PENDING,
+                'payment_status' => $data['payment_status'] ?? PaymentStatus::PENDING,
+                'notes'          => $data['notes'] ?? null,
             ]);
 
             $book->decrement('available_copies');
@@ -98,6 +98,70 @@ class RentalService
         }
 
         $rental->update($updateData);
+
+        return $rental;
+    }
+
+    /**
+     * Update basic details of an existing rental.
+     *
+     * @param Rental $rental
+     * @param array $data Validated request data
+     * @return Rental
+     * @throws Exception
+     */
+    public function updateRental(Rental $rental, array $data): Rental
+    {
+        // Updatе rental dates and recalculate price if either date is changed
+        if (isset($data['start_date']) || isset($data['end_date'])) {
+            if (in_array($rental->status, [RentalStatus::COMPLETED, RentalStatus::CANCELLED])) {
+                throw new Exception(__('messages.cannot_update_closed_rental'));
+            }
+
+            // Cannot change dates (and price) if already paid
+            if ($rental->payment_status === PaymentStatus::PAID) {
+                throw new Exception(__('messages.cannot_change_dates_for_paid')); 
+            }
+
+            $startDate = isset($data['start_date']) ? Carbon::parse($data['start_date']) : $rental->start_date;
+            $endDate = isset($data['end_date']) ? Carbon::parse($data['end_date']) : $rental->end_date;
+
+            $days = $startDate->diffInDays($endDate);
+            $days = $days === 0 ? 1 : $days;
+
+            $rental->start_date = $startDate;
+            $rental->end_date = $endDate;
+            $rental->total_price = $days * $rental->daily_price;
+        }
+
+        // Update payment_method
+        if (isset($data['payment_method']) && $data['payment_method'] !== $rental->payment_method->value) {
+
+            // Cannot change payment method if already paid or refunded
+            if ($rental->payment_status !== PaymentStatus::PENDING) {
+                throw new Exception(__('messages.cannot_change_payment_method_for_paid'));
+            }
+
+            $rental->payment_method = $data['payment_method'];
+
+            // If switched to online — generate checkout URL
+            if ($rental->payment_method === PaymentMethod::PAY_ONLINE) {
+                $rental->checkout_url = $this->paymentService->generateCheckoutUrl($rental);
+            
+            }
+            // If switched to cash — remove checkout URL
+            else {
+                $rental->checkout_url = null;
+            }
+        }
+
+        if (array_key_exists('notes', $data)) {
+            $rental->notes = $data['notes'];
+        }
+        if (array_key_exists('late_fee', $data)) {
+            $rental->late_fee = $data['late_fee'];
+        }
+        $rental->save();
 
         return $rental;
     }
