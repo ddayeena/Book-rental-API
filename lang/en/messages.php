@@ -20,5 +20,9 @@ return [
     
     'cannot_update_closed_rental' => 'You can not update closed rental.',
     'cannot_change_dates_for_paid'=> 'You can not update date for paid rentals.',
-    'cannot_change_payment_method_for_paid' => 'You can not update payment method for paid rental.'
+    'cannot_change_payment_method_for_paid' => 'You can not update payment method for paid rental.',
+
+    'cannot_delete_paid_rental'   => 'You cannot delete a paid rental.',
+    'cannot_delete_active_rental' => 'You cannot delete an active rental.',
+    'cannot_restore_no_copies'    => 'You cannot restore rental because the book has no available copies.',
 ];

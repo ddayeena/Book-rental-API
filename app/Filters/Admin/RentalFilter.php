@@ -40,6 +40,19 @@ class RentalFilter extends QueryFilter
     }
 
     /**
+     * Filter by trashed (deleted) status.
+     * Accessible values: 'with' (all), 'only' (just deleted)
+     */
+    public function trashed(string $value): Builder
+    {
+        return match ($value) {
+            'with'  => $this->builder->withTrashed(), 
+            'only'  => $this->builder->onlyTrashed(), 
+            default => $this->builder, 
+        };
+    }
+
+    /**
      * Sort rentals.
      */
     public function sort(string $value): Builder

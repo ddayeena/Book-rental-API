@@ -72,8 +72,11 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('authors', AuthorController::class);
-            Route::apiResource('rentals', RentalController::class);
-
+           
+            //Rentals
+            Route::post('rentals/{rental}/restore', [RentalController::class, 'restore'])->name('rentals.restore');
+            Route::apiResource('rentals', RentalController::class)->withTrashed(['show','update']);
+            
             // Books
             Route::prefix('books')->controller(BookController::class)->group(function () {
                 // Trash and Restore

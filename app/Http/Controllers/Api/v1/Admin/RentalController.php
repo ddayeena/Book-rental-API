@@ -11,6 +11,7 @@ use App\Http\Resources\Api\v1\Admin\Rental\RentalResource;
 use App\Models\Rental;
 use App\Models\User;
 use App\Services\RentalService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RentalController extends Controller
 {
@@ -63,6 +64,37 @@ class RentalController extends Controller
             $updatedRental = $this->rentalService->updateRental($rental, $request->validated());
 
             return $this->success(new RentalResource($updatedRental), __('messages.updated'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.update_failed'), 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified rental from storage.
+     */
+    public function destroy(Rental $rental)
+    {
+        try {
+            $this->rentalService->deleteRental($rental);
+            return $this->success(null, __('messages.deleted'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.delete_failed'), 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Restore a soft-deleted rental.
+     */
+    public function restore(string $id)
+    {
+        try {
+            $rental = Rental::withTrashed()->findOrFail($id);
+
+            $restoredRental = $this->rentalService->restoreRental($rental);
+
+            return $this->success(new RentalResource($restoredRental), __('messages.updated'), 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->error(__('messages.not_found'), 404);
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 400, $e->getMessage());
         }

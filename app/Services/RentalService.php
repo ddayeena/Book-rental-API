@@ -165,4 +165,67 @@ class RentalService
 
         return $rental;
     }
+
+    /**
+     * Safely delete (soft delete) a rental order.
+     *
+     * @param Rental $rental
+     * @return void
+     * @throws Exception
+     */
+    public function deleteRental(Rental $rental): void
+    {
+        // Paid rentals should never be deleted to preserve financial records 
+        if ($rental->payment_status === PaymentStatus::PAID) {
+            throw new Exception(__('messages.cannot_delete_paid_rental'));
+        }
+
+        // Delete only if rental is in PENDING or CANCELLED status to prevent data loss of active rentals
+        if (!in_array($rental->status, [RentalStatus::PENDING, RentalStatus::CANCELLED])) {
+            throw new Exception(__('messages.cannot_delete_active_rental'));
+        }
+
+        DB::transaction(function () use ($rental) {
+            // If the rental was pending, it means the book was reserved and not yet picked up. 
+            // We need to return that reservation back to available stock.
+            if ($rental->status === RentalStatus::PENDING) {
+                $rental->book()->increment('available_copies');
+            }
+
+            $rental->delete();
+        });
+    }
+
+    /**
+     * Restore a soft-deleted rental.
+     *
+     * @param Rental $rental
+     * @return Rental
+     * @throws Exception
+     */
+    public function restoreRental(Rental $rental): Rental
+    {
+        // If rental was not soft-deleted, we should not restore it 
+        if (!$rental->trashed()) {
+            throw new Exception(__('messages.rental_not_trashed')); 
+        }
+
+        return DB::transaction(function () use ($rental) {
+            // When restoring, if it was a PENDING rental, we need to take the book back from the shelf
+            if ($rental->status === RentalStatus::PENDING) {
+                $book = $rental->book()->lockForUpdate()->first();
+
+                // If rental was in the cart, but in the meantime all copies were rented out — block the restore action
+                if ($book->available_copies <= 0) {
+                    throw new Exception(__('messages.cannot_restore_no_copies')); 
+                }
+
+                $book->decrement('available_copies');
+            }
+
+            $rental->restore();
+
+            return $rental;
+        });
+    }
 }

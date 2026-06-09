@@ -20,5 +20,9 @@ return [
 
     'cannot_update_closed_rental' => 'Ви не можете оновити завершену оренду.',
     'cannot_change_dates_for_paid'=> 'Ви не можете оновити дати оплаченої оренди.',
-    'cannot_change_payment_method_for_paid' => 'Ви не можете змінити метод оплати для оплаченого замовлення.'
+    'cannot_change_payment_method_for_paid' => 'Ви не можете змінити метод оплати для оплаченого замовлення.',
+
+    'cannot_delete_paid_rental'   => 'Ви не можете видалити оплачену оренду.',
+    'cannot_delete_active_rental' => 'Ви не можете видалити активну оренду.',
+    'cannot_restore_no_copies'    => 'Ви не можете відновити оренду, тому що в книги немає доступних копій.',
 ];
