@@ -35,10 +35,6 @@ class UpdateRentalRequest extends BaseRequest
                 'date',
                 'after_or_equal:start_date'
             ],
-            'notes'          => [
-                'nullable',
-                'string'
-            ],
             'payment_method' => [
                 'sometimes',
                 Rule::enum(PaymentMethod::class)

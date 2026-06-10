@@ -51,8 +51,6 @@ class RentalResource extends JsonResource
             ),
 
             'checkout_url'         => $this->checkout_url ?? null,
-
-            'notes'        => $this->notes,
             'created_at'   => $this->created_at->toIso8601String(),
         ];
     }

@@ -62,11 +62,6 @@ class StoreRentalRequest extends BaseRequest
                 },
             ],
 
-            'notes' => [
-                'nullable',
-                'string',
-            ],
-
             'payment_method' => [
                 'required',
                 Rule::enum(PaymentMethod::class)

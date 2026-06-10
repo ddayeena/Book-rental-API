@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\v1\Admin;
 
 use App\Filters\Admin\RentalFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\v1\Admin\Rental\IssueRentalRequest;
+use App\Http\Requests\Api\v1\Admin\Rental\ReturnRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\StoreRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\UpdateRentalRequest;
 use App\Http\Resources\Api\v1\Admin\Rental\RentalListResource;
@@ -97,6 +99,43 @@ class RentalController extends Controller
             return $this->error(__('messages.not_found'), 404);
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Mark the rental as active (physically issue the book).
+     */
+    public function issue(IssueRentalRequest $request, Rental $rental)
+    {
+        try {
+            $validated = $request->validated();
+
+            $updatedRental = $this->rentalService->issueRental($rental, $validated['notes'] ?? null);
+
+            return $this->success(new RentalResource($updatedRental), __('messages.rental_issued'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.issue_failed'), 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Process book return and calculate late fees.
+     */
+    public function processReturn(ReturnRentalRequest $request, Rental $rental)
+    {
+        try {
+            $validated = $request->validated();
+
+            $updatedRental = $this->rentalService->returnRental($rental, $validated['notes'] ?? null);
+
+            $message = __('messages.rental_returned');
+            if ($updatedRental->late_fee > 0) {
+                $message = __('messages.rental_returned_with_fee', ['fee' => $updatedRental->late_fee]);
+            }
+
+            return $this->success(new RentalResource($updatedRental), $message, 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.return_failed'), 400, $e->getMessage());
         }
     }
 }
