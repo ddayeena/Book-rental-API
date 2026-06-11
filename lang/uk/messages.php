@@ -40,6 +40,7 @@ return [
     'action_lost'   => 'Втрата',
     'action_payment'=> 'Оплата',
     'action_cancel' => 'Скасування',
+    'action_refunded' => 'Повернення коштів',
     'note_prefix'   => '[:date :action]: ',
 
     'cannot_mark_lost_inactive'=> 'Неможливо відмітити як втрачену: замовлення не є активним.',
@@ -68,4 +69,8 @@ return [
     'email_overdue_greeting' => 'Увага, :name!',
     'email_overdue_body'     => 'Повідомляємо, що термін оренди книги «:title» закінчився :date.',
     'email_overdue_warning'  => 'Будь ласка, поверніть книгу найближчим часом, щоб уникнути додаткових штрафів за кожен день запізнення.',
+
+    'cannot_refund_unpaid'      => 'Не неможливо повернути кошти, оскільки замовлення не було оплачено.',
+    'manual_refund_confirmed'   => 'Кошти успішно повернуто клієнту.',
+    'refund_successful'         => 'Статус повернення коштів успішно оновлено.',
 ];

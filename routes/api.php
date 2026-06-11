@@ -77,12 +77,13 @@ Route::prefix('v1')->group(function () {
             // Rentals
             Route::prefix('rentals')->controller(RentalController::class)->group(function () {
                 Route::post('bulk-export', 'bulkExport')->name('rentals.bulk-export');
-                Route::post('{rental}/restore', 'restore')->name('rentals.restore');
+                Route::post('{rental}/restore', 'restore')->name('rentals.restore')->withTrashed();
                 Route::post('{rental}/issue', 'issue')->name('rentals.issue');
                 Route::post('{rental}/return', 'processReturn')->name('rentals.return');
                 Route::post('{rental}/lost', 'markLost')->name('rentals.lost');
                 Route::post('{rental}/mark-paid', 'markPaid')->name('rentals.mark-paid');
                 Route::post('{rental}/cancel', 'cancel')->name('rentals.admin.cancel');
+                Route::post('{rental}/mark-refunded', 'markRefunded')->name('rentals.mark-refunded');
             });
             Route::apiResource('rentals', RentalController::class)->withTrashed(['show', 'update']);
 

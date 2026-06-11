@@ -40,6 +40,7 @@ return [
     'action_lost'   => 'Lost',
     'action_payment'=> 'Payment',
     'action_cancel' => 'Cancel',
+    'action_refunded' => 'Refund',
     'note_prefix'   => '[:date :action]: ', 
 
     'cannot_mark_lost_inactive'=> 'It is not possible to mark as lost: the order is not active.',
@@ -68,4 +69,8 @@ return [
     'email_overdue_greeting' => 'Attention, :name!',
     'email_overdue_body'     => 'We inform you that the rental period for the book ":title" expired on :date.',
     'email_overdue_warning'  => 'Please return the book as soon as possible to avoid additional late fees for each day of delay.',
+
+    'cannot_refund_unpaid'      => 'Cannot refund funds because the rental was not paid.',
+    'manual_refund_confirmed'   => 'Funds have been successfully refunded to the client.',
+    'refund_successful'         => 'Refund status updated successfully.',
 ];

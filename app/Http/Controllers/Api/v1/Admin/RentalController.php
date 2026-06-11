@@ -10,6 +10,7 @@ use App\Http\Requests\Api\v1\Admin\Rental\CancelRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\IssueRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\MarkDebtPaidRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\MarkRentalLostRequest;
+use App\Http\Requests\Api\v1\Admin\Rental\MarkRentalRefundedRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\ReturnRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\StoreRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\UpdateRentalRequest;
@@ -18,7 +19,6 @@ use App\Http\Resources\Api\v1\Admin\Rental\RentalResource;
 use App\Models\Rental;
 use App\Models\User;
 use App\Services\RentalService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RentalController extends Controller
@@ -93,16 +93,12 @@ class RentalController extends Controller
     /**
      * Restore a soft-deleted rental.
      */
-    public function restore(string $id)
+    public function restore(Rental $rental)
     {
         try {
-            $rental = Rental::withTrashed()->findOrFail($id);
-
             $restoredRental = $this->rentalService->restoreRental($rental);
 
             return $this->success(new RentalResource($restoredRental), __('messages.updated'), 200);
-        } catch (ModelNotFoundException $e) {
-            return $this->error(__('messages.not_found'), 404);
         } catch (\Exception $e) {
             return $this->error(__('messages.update_failed'), 400, $e->getMessage());
         }
@@ -113,7 +109,7 @@ class RentalController extends Controller
      */
     public function cancel(CancelRentalRequest $request, Rental $rental)
     {
-        $validated = $request->validated([]);
+        $validated = $request->validated();
 
         try {
             $updatedRental = $this->rentalService->cancelRental($rental, $validated['notes'] ?? null);
@@ -193,7 +189,7 @@ class RentalController extends Controller
     public function markPaid(MarkDebtPaidRequest $request, Rental $rental)
     {
         try {
-            $validated = $request->validated([]);
+            $validated = $request->validated();
 
             $updatedRental = $this->rentalService->markAsPaid($rental, $validated['notes'] ?? null);
 
@@ -213,5 +209,21 @@ class RentalController extends Controller
     public function bulkExport(BulkExportRentalsRequest $request): StreamedResponse
     {
         return $this->rentalService->exportRentalsToCsv($request->input('ids'));
+    }
+
+    /**
+     * Mark a rental as successfully refunded.
+     */
+    public function markRefunded(MarkRentalRefundedRequest $request, Rental $rental)
+    {
+        $validated = $request->validated();
+
+        try {
+            $updatedRental = $this->rentalService->markAsRefunded($rental, $validated['notes'] ?? null);
+
+            return $this->success(new RentalResource($updatedRental), __('messages.refund_successful'));
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 400);
+        }
     }
 }

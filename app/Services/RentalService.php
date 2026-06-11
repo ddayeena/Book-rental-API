@@ -110,8 +110,8 @@ class RentalService
             ];
 
             if ($rental->payment_status === PaymentStatus::PAID) {
-                $updateData['payment_status'] = PaymentStatus::REFUNDED;
-                Log::warning("Rental {$rental->id} was cancelled by user AFTER payment. Manual refund required.");
+                $updateData['payment_status'] = PaymentStatus::REFUND_PENDING; 
+                Log::warning("Rental {$rental->id} was cancelled AFTER payment. Manual refund required.");
             }
 
             if ($notes) {
@@ -488,5 +488,33 @@ class RentalService
             'Pragma'              => 'no-cache',
             'Expires'             => '0',
         ]);
+    }
+
+    /**
+     * Mark a rental's payment as fully refunded by Admin.
+     */
+    public function markAsRefunded(Rental $rental, ?string $notes = null): Rental
+    {
+        if (!in_array($rental->payment_status, [PaymentStatus::PAID, PaymentStatus::REFUND_PENDING])) {
+            throw new \Exception(__('messages.cannot_refund_unpaid'));
+        }
+
+        return DB::transaction(function () use ($rental, $notes) {
+            $updateData = [
+                'payment_status' => PaymentStatus::REFUNDED,
+            ];
+
+            $prefix = __('messages.note_prefix', [
+                'date'   => now()->format('Y-m-d H:i'),
+                'action' => __('messages.action_refunded') ?? 'Повернення коштів'
+            ]);
+            
+            $customNote = $notes ?? 'Кошти успішно повернуто клієнту.';
+            $updateData['notes'] = $rental->notes ? $rental->notes . "\n" . $prefix . $customNote : $prefix . $customNote;
+
+            $rental->update($updateData);
+
+            return $rental;
+        });
     }
 }
