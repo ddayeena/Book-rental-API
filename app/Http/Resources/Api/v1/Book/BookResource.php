@@ -26,6 +26,7 @@ class BookResource extends JsonResource
             'isbn'             => $this->isbn,
             'cover_image_url'  => $this->cover_image_url,
             'daily_price'      => $this->daily_price,
+            'prce'             => $this->price,
             'is_available'     => $this->available_copies > 0,
         ];
     }

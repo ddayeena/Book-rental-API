@@ -23,7 +23,7 @@ class PaymentService
     public function generateCheckoutUrl(Rental $rental): string
     {
         $shortId = strtoupper(substr($rental->id, -6));
-        
+
         $params = [
             'public_key'   => $this->publicKey,
             'version'      => '3',
@@ -32,6 +32,32 @@ class PaymentService
             'currency'     => 'UAH',
             'description'  => "Оренда книги замовлення (№{$shortId})",
             'order_id'     => $rental->id,
+            'server_url'   => rtrim(config('app.url'), '/') . '/api/v1/webhooks/liqpay',
+            'result_url'   => config('app.frontend_url', 'http://localhost:3000') . '/profile/rentals',
+            'sandbox'      => $this->sandbox
+        ];
+
+        $data = base64_encode(json_encode($params));
+        $signature = $this->generateSignature($data);
+
+        return "https://www.liqpay.ua/api/3/checkout?data=" . urlencode($data) . "&signature=" . urlencode($signature);
+    }
+
+    /**
+     * Generate a checkout URL for LiqPay specifically for paying the late fee / debt.
+     */
+    public function generateDebtCheckoutUrl(Rental $rental): string
+    {
+        $shortId = strtoupper(substr($rental->id, -6));
+
+        $params = [
+            'public_key'   => $this->publicKey,
+            'version'      => '3',
+            'action'       => 'pay',
+            'amount'       => (float) $rental->late_fee, 
+            'currency'     => 'UAH',
+            'description'  => "Оплата штрафу за замовлення (№{$shortId})",
+            'order_id'     => $rental->id . '_debt',
             'server_url'   => rtrim(config('app.url'), '/') . '/api/v1/webhooks/liqpay',
             'result_url'   => config('app.frontend_url', 'http://localhost:3000') . '/profile/rentals',
             'sandbox'      => $this->sandbox

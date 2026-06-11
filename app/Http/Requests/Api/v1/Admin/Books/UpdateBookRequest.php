@@ -93,6 +93,12 @@ class UpdateBookRequest extends BaseRequest
                 'numeric',
                 'min:0'
             ],
+            'price' => [
+                'sometimes',
+                'required',
+                'numeric',
+                'min:0'
+            ],
             'is_active' => [
                 'sometimes',
                 'required',
