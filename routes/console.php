@@ -8,4 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('rentals:cancel-expired')->dailyAt('02:00');
+Schedule::command('app:cancel-expired-rentals')->dailyAt('02:00');
+Schedule::command('app:check-overdue-rentals')->dailyAt('01:00');

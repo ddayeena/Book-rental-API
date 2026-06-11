@@ -297,7 +297,7 @@ class RentalService
      */
     public function returnRental(Rental $rental, ?string $notes = null, bool $isFeePaid = false): Rental
     {
-        if ($rental->status !== RentalStatus::ACTIVE) {
+        if (!in_array($rental->status, [RentalStatus::ACTIVE, RentalStatus::OVERDUE])) {
             throw new Exception(__('messages.cannot_return_inactive'));
         }
 
@@ -339,7 +339,7 @@ class RentalService
      */
     public function markAsLost(Rental $rental, ?string $notes = null, bool $isFeePaid = false): Rental
     {
-        if ($rental->status !== RentalStatus::ACTIVE) {
+        if (!in_array($rental->status, [RentalStatus::ACTIVE, RentalStatus::OVERDUE])) {
             throw new Exception(__('messages.cannot_mark_lost_inactive'));
         }
 

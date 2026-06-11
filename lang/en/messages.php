@@ -63,4 +63,9 @@ return [
     'email_cancelled_reason'   => 'Reason: :reason',
     'email_footer'             => 'Thank you for using our service!',
     'auto_cancel_reason'       => 'System: Automatic cancellation (not picked up within :days days).',
+
+    'email_overdue_subject'  => 'Overdue rental notification №:id',
+    'email_overdue_greeting' => 'Attention, :name!',
+    'email_overdue_body'     => 'We inform you that the rental period for the book ":title" expired on :date.',
+    'email_overdue_warning'  => 'Please return the book as soon as possible to avoid additional late fees for each day of delay.',
 ];
