@@ -57,7 +57,7 @@ class PaymentService
             'amount'       => (float) $rental->late_fee, 
             'currency'     => 'UAH',
             'description'  => "Оплата штрафу за замовлення (№{$shortId})",
-            'order_id'     => $rental->id,
+            'order_id'     => $rental->id . '_debt',
             'server_url'   => rtrim(config('app.url'), '/') . '/api/v1/webhooks/liqpay',
             'result_url'   => config('app.frontend_url', 'http://localhost:3000') . '/profile/rentals',
             'sandbox'      => $this->sandbox

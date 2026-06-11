@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
-
     public function __construct(
         protected PaymentService $paymentService
     ) {}
@@ -36,7 +35,12 @@ class WebhookController extends Controller
         $successStatuses = ['success', 'sandbox'];
         $failedStatuses = ['failure', 'error'];
 
-        $rental = Rental::find($payload['order_id']);
+        $liqpayOrderId = $payload['order_id'];
+
+        $isDebt = str_contains($liqpayOrderId, '_debt');
+        $rentalId = str_replace('_debt', '', $liqpayOrderId);
+
+        $rental = Rental::find($rentalId);
 
         if ($rental) {
             // If payment was successful, update the rental status to PAID
@@ -46,7 +50,12 @@ class WebhookController extends Controller
                         'payment_status' => PaymentStatus::PAID,
                         'transaction_id' => $payload['payment_id'] ?? null,
                     ]);
-                    Log::info("Rental {$rental->id} paid successfully via LiqPay.");
+
+                    $logMessage = $isDebt 
+                        ? "Debt for rental {$rental->id} paid successfully via LiqPay."
+                        : "Rental {$rental->id} paid successfully via LiqPay.";
+                        
+                    Log::info($logMessage);
                 }
             }
             // if payment failed, update the rental status to FAILED only if it was still PENDING
@@ -55,7 +64,9 @@ class WebhookController extends Controller
                     $rental->update([
                         'payment_status' => PaymentStatus::FAILED,
                     ]);
-                    Log::warning("Rental {$rental->id} payment failed. Reason: " . ($payload['err_description'] ?? 'Unknown'));
+                    
+                    $logContext = $isDebt ? "Debt payment" : "Rental payment";
+                    Log::warning("{$logContext} {$rental->id} failed. Reason: " . ($payload['err_description'] ?? 'Unknown'));
                 }
             }
         }
