@@ -35,7 +35,13 @@ return [
     'return_failed'   => 'Failed to return rental order.',
 
 
-    'action_issue'  => 'Видача',
-    'action_return' => 'Повернення',
-    'note_prefix'   => '[:date :action]: ',
+    'action_issue'  => 'Issue',
+    'action_return' => 'Return',
+    'action_lost'   => 'Lost',
+    'note_prefix'   => '[:date :action]: ', 
+
+    'cannot_mark_lost_inactive'=> 'It is not possible to mark as lost: the order is not active.',
+    'rental_marked_lost'       => 'The book has been marked as lost. A penalty for compensation has been charged in the amount of :fee UAH.',
+    'lost_failed'              => 'It is not possible to mark the book as lost.',
+
 ];

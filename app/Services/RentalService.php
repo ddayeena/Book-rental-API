@@ -153,7 +153,7 @@ class RentalService
                 $rental->checkout_url = null;
             }
         }
-        
+
         if (array_key_exists('late_fee', $data)) {
             $rental->late_fee = $data['late_fee'];
         }
@@ -291,8 +291,8 @@ class RentalService
                 'status'      => RentalStatus::COMPLETED,
                 'returned_at' => $now,
                 'late_fee'    => $lateFee > 0 ? $lateFee : null,
-                'payment_status' => $rental->payment_method === PaymentMethod::PAY_ON_PICKUP 
-                    ? PaymentStatus::PAID 
+                'payment_status' => $rental->payment_method === PaymentMethod::PAY_ON_PICKUP
+                    ? PaymentStatus::PAID
                     : $rental->payment_status
             ];
 
@@ -306,6 +306,56 @@ class RentalService
 
             $rental->update($updateData);
             $rental->book()->increment('available_copies');
+
+            return $rental;
+        });
+    }
+
+    /**
+     * Mark the rental as lost (Decrement total copies and calculate full penalty).
+     */
+    public function markAsLost(Rental $rental, ?string $notes = null, bool $isFeePaid = false): Rental
+    {
+        if ($rental->status !== RentalStatus::ACTIVE) {
+            throw new Exception(__('messages.cannot_mark_lost_inactive'));
+        }
+
+        return DB::transaction(function () use ($rental, $notes, $isFeePaid) {
+            $book = $rental->book()->lockForUpdate()->first();
+
+            $bookValue = $book->price;
+
+            $processingFee = config('rental.lost_processing_fee', 100);
+
+            // Late days fee (if the book is returned late and then marked as lost, we also charge for the overdue days)
+            $lateDaysFee = 0;
+            $now = Carbon::now();
+            if ($now->greaterThan($rental->end_date->endOfDay())) {
+                $overdueDays = (int) $rental->end_date->startOfDay()->diffInDays($now->startOfDay());
+                $multiplier = config('rental.penalty_multiplier', 2);
+                $lateDaysFee = $overdueDays * ($rental->daily_price * $multiplier);
+            }
+
+            $totalPenalty = $bookValue + $processingFee + $lateDaysFee;
+
+            $updateData = [
+                'status'   => RentalStatus::LOST,
+                'late_fee' => $totalPenalty,
+                'payment_status' => $isFeePaid ? PaymentStatus::PAID : PaymentStatus::PENDING,
+            ];
+
+            if ($notes) {
+                $prefix = __('messages.note_prefix', [
+                    'date'   => now()->format('Y-m-d H:i'),
+                    'action' => __('messages.action_lost')
+                ]);
+                $updateData['notes'] = $rental->notes ? $rental->notes . "\n" . $prefix . $notes : $prefix . $notes;
+            }
+
+            $rental->update($updateData);
+
+            // Decrement total_copies because the book is lost 
+            $book->decrement('total_copies');
 
             return $rental;
         });

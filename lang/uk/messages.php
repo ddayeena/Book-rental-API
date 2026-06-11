@@ -35,7 +35,13 @@ return [
     'return_failed'   => 'Не вдалося повернути оренду.',
 
 
-    'action_issue'  => 'Issue',
-    'action_return' => 'Return',
-    'note_prefix'   => '[:date :action]: ', 
+    'action_issue'  => 'Видача',
+    'action_return' => 'Повернення',
+    'action_lost'   => 'Втрата',
+    'note_prefix'   => '[:date :action]: ',
+
+    'cannot_mark_lost_inactive'=> 'Неможливо відмітити як втрачену: замовлення не є активним.',
+    'rental_marked_lost'       => 'Книгу відмічено як втрачену. Нараховано штраф для відшкодування: :fee грн.',
+    'lost_failed'              => 'Не вдалося відмітити книгу як втрачену.',
+    
 ];

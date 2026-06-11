@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Admin;
 use App\Filters\Admin\RentalFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\Rental\IssueRentalRequest;
+use App\Http\Requests\Api\v1\Admin\Rental\MarkRentalLostRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\ReturnRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\StoreRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\UpdateRentalRequest;
@@ -136,6 +137,29 @@ class RentalController extends Controller
             return $this->success(new RentalResource($updatedRental), $message, 200);
         } catch (\Exception $e) {
             return $this->error(__('messages.return_failed'), 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Mark the rental as lost and apply penalty.
+     */
+    public function markLost(MarkRentalLostRequest $request, Rental $rental)
+    {
+        try {
+            $validated = $request->validated();
+
+            $updatedRental = $this->rentalService->markAsLost(
+                $rental, 
+                $validated['notes'] ?? null,
+                $validated['is_fee_paid'] ?? false 
+            );
+            return $this->success(
+                new RentalResource($updatedRental),
+                __('messages.rental_marked_lost', ['fee' => $updatedRental->late_fee]), 
+                200
+            );
+        } catch (\Exception $e) {
+            return $this->error(__('messages.lost_failed'), 400, $e->getMessage());
         }
     }
 }

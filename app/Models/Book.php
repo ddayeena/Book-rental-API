@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Cache;
     'total_copies',
     'available_copies',
     'daily_price',
+    'price',
     'is_active'
 ])]
 class Book extends Model

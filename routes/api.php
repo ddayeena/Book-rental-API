@@ -77,6 +77,7 @@ Route::prefix('v1')->group(function () {
             Route::post('rentals/{rental}/restore', [RentalController::class, 'restore'])->name('rentals.restore');
             Route::post('rentals/{rental}/issue', [RentalController::class, 'issue'])->name('rentals.issue');
             Route::post('rentals/{rental}/return', [RentalController::class, 'processReturn'])->name('rentals.return');
+            Route::post('rentals/{rental}/lost', [RentalController::class, 'markLost'])->name('rentals.lost');
             Route::apiResource('rentals', RentalController::class)->withTrashed(['show','update']);
             
             // Books
