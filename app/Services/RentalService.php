@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RentalService
 {
@@ -419,5 +420,73 @@ class RentalService
         }
         
         return $lateDaysFee;
+    }
+    
+
+    /**
+     * Generate a full streamed CSV response for exporting rentals.
+     */
+    public function exportRentalsToCsv(array $ids): StreamedResponse
+    {
+        return new StreamedResponse(function () use ($ids) {
+            $handle = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility 
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Define Full CSV Headings 
+            fputcsv($handle, [
+                'ID замовлення',
+                'Клієнт (Ім\'я)',
+                'Клієнт (Прізвище)',
+                'Клієнт (Email)',
+                'Назва книги',
+                'Дата видачі (план)',
+                'Дата повернення (план)',
+                'Фактична дата повернення',
+                'Ціна за день',
+                'Загальна вартість',
+                'Штраф за запізнення',
+                'Спосіб оплати',
+                'Статус оплати',
+                'Статус оренди',
+                'Дата створення',
+                'Нотатки'
+            ], ';');
+
+            // Stream records in chunks to prevent memory exhaustion
+            Rental::with(['user', 'book'])
+                ->whereIn('id', $ids)
+                ->chunk(100, function ($rentals) use ($handle) {
+                    foreach ($rentals as $rental) {
+                        fputcsv($handle, [
+                            $rental->id,
+                            $rental->user->first_name ?? 'Видалений користувач',
+                            $rental->user->last_name ?? 'Видалений користувач',
+                            $rental->user->email ?? '-',
+                            $rental->book->title ?? 'Видалена книга',
+                            $rental->start_date->format('Y-m-d'),
+                            $rental->end_date->format('Y-m-d'),
+                            $rental->returned_at ? $rental->returned_at->format('Y-m-d') : '-',
+                            $rental->daily_price,
+                            $rental->total_price,
+                            $rental->late_fee,
+                            $rental->payment_method->label(),
+                            $rental->payment_status->label(),
+                            $rental->status->label(), 
+                            $rental->created_at->format('Y-m-d H:i'),
+                            str_replace(["\r", "\n"], " | ", $rental->notes ?? '')
+                        ], ';');
+                    }
+                });
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="rentals_export_' . now()->format('Y_m_d_His') . '.csv"',
+            'Cache-Control'       => 'no-cache, must-revalidate',
+            'Pragma'              => 'no-cache',
+            'Expires'             => '0',
+        ]);
     }
 }

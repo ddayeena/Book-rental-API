@@ -56,7 +56,7 @@ Route::prefix('v1')->group(function () {
         Route::get('{id}', 'show')->name('books.show');
         Route::get('{book}/related', 'related')->name('books.related');
     });
-    
+
     // Liqpay Webhook
     Route::post('webhooks/liqpay', [WebhookController::class, 'liqpay'])->name('webhooks.liqpay');
 
@@ -65,7 +65,7 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         // Rental
-        Route::apiResource('rentals', PublicRentalController::class)->only('index','show','store');
+        Route::apiResource('rentals', PublicRentalController::class)->only('index', 'show', 'store');
         Route::patch('rentals/{id}/cancel', [PublicRentalController::class, 'cancel'])->name('rentals.cancel');
         Route::post('rentals/{rental}/pay-debt', [PublicRentalController::class, 'payDebt'])->name('rentals.pay-debt');
 
@@ -73,23 +73,26 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('authors', AuthorController::class);
-           
-            //Rentals
-            Route::post('rentals/{rental}/restore', [RentalController::class, 'restore'])->name('rentals.restore');
-            Route::post('rentals/{rental}/issue', [RentalController::class, 'issue'])->name('rentals.issue');
-            Route::post('rentals/{rental}/return', [RentalController::class, 'processReturn'])->name('rentals.return');
-            Route::post('rentals/{rental}/lost', [RentalController::class, 'markLost'])->name('rentals.lost');
-            Route::post('rentals/{rental}/mark-paid', [RentalController::class, 'markPaid'])->name('rentals.mark-paid');
-            Route::post('rentals/{rental}/cancel', [RentalController::class, 'cancel'])->name('rentals.admin.cancel');
-            Route::apiResource('rentals', RentalController::class)->withTrashed(['show','update']);
-            
+
+            // Rentals
+            Route::prefix('rentals')->controller(RentalController::class)->group(function () {
+                Route::post('bulk-export', 'bulkExport')->name('rentals.bulk-export');
+                Route::post('{rental}/restore', 'restore')->name('rentals.restore');
+                Route::post('{rental}/issue', 'issue')->name('rentals.issue');
+                Route::post('{rental}/return', 'processReturn')->name('rentals.return');
+                Route::post('{rental}/lost', 'markLost')->name('rentals.lost');
+                Route::post('{rental}/mark-paid', 'markPaid')->name('rentals.mark-paid');
+                Route::post('{rental}/cancel', 'cancel')->name('rentals.admin.cancel');
+            });
+            Route::apiResource('rentals', RentalController::class)->withTrashed(['show', 'update']);
+
             // Books
             Route::prefix('books')->controller(BookController::class)->group(function () {
                 // Trash and Restore
                 Route::get('trash', 'trash')->name('books.trash');
                 Route::post('bulk-restore', 'bulkRestore')->name('books.bulk-restore');
                 Route::post('bulk-force-delete', 'bulkForceDelete')->name('books.bulk-force-delete');
-        
+
                 // Bulk Actions
                 Route::post('bulk-delete', 'bulkDestroy')->name('books.bulk-delete');
                 Route::post('bulk-active', 'bulkToggleActive')->name('books.bulk-active');

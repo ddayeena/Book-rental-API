@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Admin;
 use App\Enums\PaymentStatus;
 use App\Filters\Admin\RentalFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\v1\Admin\Rental\BulkExportRentalsRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\CancelRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\IssueRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\MarkDebtPaidRequest;
@@ -18,6 +19,7 @@ use App\Models\Rental;
 use App\Models\User;
 use App\Services\RentalService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RentalController extends Controller
 {
@@ -203,5 +205,13 @@ class RentalController extends Controller
         } catch (\Exception $e) {
             return $this->error(__('messages.payment_confirmation_failed'), 400, $e->getMessage());
         }
+    }
+
+    /**
+     * Export selected rentals to CSV.
+     */
+    public function bulkExport(BulkExportRentalsRequest $request): StreamedResponse
+    {
+        return $this->rentalService->exportRentalsToCsv($request->input('ids'));
     }
 }
