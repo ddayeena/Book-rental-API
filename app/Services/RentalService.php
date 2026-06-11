@@ -8,6 +8,7 @@ use App\Enums\RentalStatus;
 use App\Models\Book;
 use App\Models\Rental;
 use App\Models\User;
+use App\Notifications\RentalCancelledNotification;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -90,30 +91,46 @@ class RentalService
      * Cancel a pending rental order.
      *
      * @param Rental $rental
+     * @param string|null $notes Optional cancellation reason or notes to be saved with the rental record.
      * @return Rental
      * @throws \Exception
      */
-    public function cancelRental(Rental $rental): Rental
+    public function cancelRental(Rental $rental, ?string $notes = null): Rental
     {
         if ($rental->status !== RentalStatus::PENDING) {
             throw new \Exception(__('messages.not_canceled'));
         }
 
-        $updateData = [
-            'status' => RentalStatus::CANCELLED,
-        ];
+        $updatedRental = DB::transaction(function () use ($rental, $notes) {
+            $book = $rental->book()->lockForUpdate()->first();
 
-        if ($rental->payment_status === PaymentStatus::PAID) {
-            $updateData['payment_status'] = PaymentStatus::REFUNDED;
+            $updateData = [
+                'status' => RentalStatus::CANCELLED,
+            ];
 
-            Log::warning("Rental {$rental->id} was cancelled by user AFTER payment. Manual refund required.");
-        }
+            if ($rental->payment_status === PaymentStatus::PAID) {
+                $updateData['payment_status'] = PaymentStatus::REFUNDED;
+                Log::warning("Rental {$rental->id} was cancelled by user AFTER payment. Manual refund required.");
+            }
 
-        $rental->update($updateData);
+            if ($notes) {
+                $prefix = __('messages.note_prefix', [
+                    'date'   => now()->format('Y-m-d H:i'),
+                    'action' => 'Скасування'
+                ]);
+                $updateData['notes'] = $rental->notes ? $rental->notes . "\n" . $prefix . $notes : $prefix . $notes;
+            }
 
-        return $rental;
+            $rental->update($updateData);
+            $book->increment('available_copies');
+
+            return $rental;
+        });
+
+        $updatedRental->user->notify(new RentalCancelledNotification($updatedRental, $notes));
+
+        return $updatedRental;
     }
-
     /**
      * Update basic details of an existing rental.
      *

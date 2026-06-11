@@ -39,6 +39,7 @@ return [
     'action_returned' => 'Повернення',
     'action_lost'   => 'Втрата',
     'action_payment'=> 'Оплата',
+    'action_cancel' => 'Скасування',
     'note_prefix'   => '[:date :action]: ',
 
     'cannot_mark_lost_inactive'=> 'Неможливо відмітити як втрачену: замовлення не є активним.',
@@ -55,4 +56,11 @@ return [
     'manual_payment_confirmed'     => 'Оплату підтверджено менеджером вручну.',
     'payment_confirmed_successfully' => 'Статус оплати успішно оновлено на "Оплачено".',
     'payment_confirmation_failed'   => 'Не вдалося оновити статус оплати.',
+
+    'email_cancelled_subject'  => 'Скасування замовлення №:id',
+    'email_cancelled_greeting' => 'Вітаємо, :name!',
+    'email_cancelled_body'     => 'Повідомляємо, що ваше замовлення на книгу «:title» було скасовано.',
+    'email_cancelled_reason'   => 'Причина: :reason',
+    'email_footer'             => 'Дякуємо, що користуєтесь нашим сервісом!',
+    'auto_cancel_reason'       => 'Система: Автоматичне скасування (не забрано протягом :days днів).',
 ];

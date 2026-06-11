@@ -39,6 +39,7 @@ return [
     'action_returned' => 'Return',
     'action_lost'   => 'Lost',
     'action_payment'=> 'Payment',
+    'action_cancel' => 'Cancel',
     'note_prefix'   => '[:date :action]: ', 
 
     'cannot_mark_lost_inactive'=> 'It is not possible to mark as lost: the order is not active.',
@@ -55,4 +56,11 @@ return [
     'manual_payment_confirmed'     => 'Payment confirmed manually by manager.',
     'payment_confirmed_successfully' => 'Payment status successfully updated to Paid.',
     'payment_confirmation_failed'   => 'Failed to update payment status.',
+
+    'email_cancelled_subject'  => 'Cancellation of rental №:id',
+    'email_cancelled_greeting' => 'Hello, :name!',
+    'email_cancelled_body'     => 'We inform you that your rental for the book ":title" has been cancelled.',
+    'email_cancelled_reason'   => 'Reason: :reason',
+    'email_footer'             => 'Thank you for using our service!',
+    'auto_cancel_reason'       => 'System: Automatic cancellation (not picked up within :days days).',
 ];
