@@ -29,6 +29,17 @@ class RentalService
      */
     public function createRental(User $user, array $data): Rental
     {
+        // Check if the user has any unpaid late fees from previous rentals. 
+        // If yes, block new rentals until they are settled.
+        $hasDebts = Rental::where('user_id', $user->id)
+            ->where('late_fee', '>', 0)
+            ->where('payment_status', '!=', PaymentStatus::PAID)
+            ->exists();
+
+        if ($hasDebts) {
+            throw new Exception(__('messages.user_has_unpaid_debts'));
+        }
+
         return DB::transaction(function () use ($user, $data) {
 
             // Find the requested book and lock the row to prevent race conditions
@@ -70,6 +81,7 @@ class RentalService
 
                 $rental->checkout_url = $checkoutUrl;
             }
+            
             return $rental;
         });
     }
@@ -266,46 +278,40 @@ class RentalService
      * @return Rental
      * @throws Exception
      */
-    public function returnRental(Rental $rental, ?string $notes = null): Rental
+    public function returnRental(Rental $rental, ?string $notes = null, bool $isFeePaid = false): Rental
     {
-        // Book can only be returned if the rental is currently ACTIVE
         if ($rental->status !== RentalStatus::ACTIVE) {
-            throw new Exception(__('messages.cannot_return_inactive_rental'));
+            throw new Exception(__('messages.cannot_return_inactive'));
         }
 
-        return DB::transaction(function () use ($rental, $notes) {
-            $now = Carbon::now();
-            $lateFee = 0;
-            // Late fee
-            if ($now->greaterThan($rental->end_date->endOfDay())) {
+        return DB::transaction(function () use ($rental, $notes, $isFeePaid) {
+            $book = $rental->book()->lockForUpdate()->first();
 
-                $overdueDays = (int) $rental->end_date->startOfDay()->diffInDays($now->startOfDay());
-
-                $multiplier = config('rental.penalty_multiplier');
-
-                $penaltyRate = $rental->daily_price * $multiplier;
-                $lateFee = $overdueDays * $penaltyRate;
-            }
+            $totalPenalty = $this->calculateLateDaysFee($rental);
 
             $updateData = [
                 'status'      => RentalStatus::COMPLETED,
-                'returned_at' => $now,
-                'late_fee'    => $lateFee > 0 ? $lateFee : null,
-                'payment_status' => $rental->payment_method === PaymentMethod::PAY_ON_PICKUP
-                    ? PaymentStatus::PAID
-                    : $rental->payment_status
+                'returned_at' => now(),
             ];
+
+            if ($totalPenalty > 0) {
+                $updateData['late_fee'] = $totalPenalty;
+                // If there is a late fee, we set payment status to PENDING until the fee is paid. 
+                // If there is no fee or if client paid, we can mark it as PAID immediately.
+                $updateData['payment_status'] = $isFeePaid ? PaymentStatus::PAID : PaymentStatus::PENDING;
+            }
 
             if ($notes) {
                 $prefix = __('messages.note_prefix', [
                     'date'   => now()->format('Y-m-d H:i'),
-                    'action' => __('messages.action_return')
+                    'action' => __('messages.action_returned')
                 ]);
                 $updateData['notes'] = $rental->notes ? $rental->notes . "\n" . $prefix . $notes : $prefix . $notes;
             }
 
             $rental->update($updateData);
-            $rental->book()->increment('available_copies');
+
+            $book->increment('available_copies');
 
             return $rental;
         });
@@ -324,23 +330,16 @@ class RentalService
             $book = $rental->book()->lockForUpdate()->first();
 
             $bookValue = $book->price;
-
             $processingFee = config('rental.lost_processing_fee', 100);
-
-            // Late days fee (if the book is returned late and then marked as lost, we also charge for the overdue days)
-            $lateDaysFee = 0;
-            $now = Carbon::now();
-            if ($now->greaterThan($rental->end_date->endOfDay())) {
-                $overdueDays = (int) $rental->end_date->startOfDay()->diffInDays($now->startOfDay());
-                $multiplier = config('rental.penalty_multiplier', 2);
-                $lateDaysFee = $overdueDays * ($rental->daily_price * $multiplier);
-            }
+            
+            // Використовуємо наш новий метод
+            $lateDaysFee = $this->calculateLateDaysFee($rental); 
 
             $totalPenalty = $bookValue + $processingFee + $lateDaysFee;
 
             $updateData = [
-                'status'   => RentalStatus::LOST,
-                'late_fee' => $totalPenalty,
+                'status'         => RentalStatus::LOST,
+                'late_fee'       => $totalPenalty,
                 'payment_status' => $isFeePaid ? PaymentStatus::PAID : PaymentStatus::PENDING,
             ];
 
@@ -353,11 +352,55 @@ class RentalService
             }
 
             $rental->update($updateData);
-
-            // Decrement total_copies because the book is lost 
             $book->decrement('total_copies');
 
             return $rental;
         });
+    }
+
+    /**
+     * Manually mark the rental payment as successful (Admin action for Cash/Terminal).
+     */
+    public function markAsPaid(Rental $rental, ?string $notes = null): Rental
+    {
+        if ($rental->payment_status === PaymentStatus::PAID) {
+            throw new Exception(__('messages.rental_already_paid'));
+        }
+
+        return DB::transaction(function () use ($rental, $notes) {
+            $updateData = [
+                'payment_status' => PaymentStatus::PAID,
+            ];
+
+            $prefix = __('messages.note_prefix', [
+                'date'   => now()->format('Y-m-d H:i'),
+                'action' => __('messages.action_payment')
+            ]);
+            
+            $customNote = $notes ?? __('messages.manual_payment_confirmed');
+            $updateData['notes'] = $rental->notes ? $rental->notes . "\n" . $prefix . $customNote : $prefix . $customNote;
+
+            $rental->update($updateData);
+
+            return $rental;
+        });
+    }
+
+
+    /**
+     * Рахує штраф виключно за дні запізнення.
+     */
+    private function calculateLateDaysFee(Rental $rental): float
+    {
+        $lateDaysFee = 0;
+        $now = Carbon::now();
+        
+        if ($now->greaterThan($rental->end_date->endOfDay())) {
+            $overdueDays = (int) $rental->end_date->startOfDay()->diffInDays($now->startOfDay());
+            $multiplier = config('rental.penalty_multiplier', 2);
+            $lateDaysFee = $overdueDays * ($rental->daily_price * $multiplier);
+        }
+        
+        return $lateDaysFee;
     }
 }

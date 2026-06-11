@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\StoreRentalRequest;
 use App\Http\Resources\Api\v1\Rental\RentalListResource;
 use App\Http\Resources\Api\v1\Rental\RentalResource;
+use App\Models\Rental;
+use App\Services\PaymentService;
 use App\Services\RentalService;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,7 +20,8 @@ class RentalController extends Controller
 {
 
     public function __construct(
-        protected RentalService $rentalService
+        protected RentalService $rentalService,
+        protected PaymentService $paymentService
     ) {}
 
     /**
@@ -105,6 +108,30 @@ class RentalController extends Controller
             return $this->success(new RentalResource($rental), $message, 200);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * Generate checkout URL for unpaid late fee.
+     */
+    public function payDebt(Rental $rental)
+    {
+        if ($rental->user_id !== auth()->id()) {
+            return $this->error(__('messages.unauthorized_action'), 403);
+        }
+
+        if (empty($rental->late_fee) || $rental->payment_status === PaymentStatus::PAID) {
+            return $this->error(__('messages.no_unpaid_debt'), 400);
+        }
+
+        try {
+            $checkoutUrl = $this->paymentService->generateDebtCheckoutUrl($rental);
+
+            return $this->success([
+                'checkout_url' => $checkoutUrl
+            ], __('messages.debt_checkout_url_generated'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.debt_payment_failed'), 500, $e->getMessage());
         }
     }
 }

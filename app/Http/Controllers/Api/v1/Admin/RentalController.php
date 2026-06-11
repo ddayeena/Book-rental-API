@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Admin;
 use App\Filters\Admin\RentalFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\Rental\IssueRentalRequest;
+use App\Http\Requests\Api\v1\Admin\Rental\MarkDebtPaidRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\MarkRentalLostRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\ReturnRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\StoreRentalRequest;
@@ -160,6 +161,26 @@ class RentalController extends Controller
             );
         } catch (\Exception $e) {
             return $this->error(__('messages.lost_failed'), 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Manually confirm payment for rental or late fee.
+     */
+    public function markPaid(MarkDebtPaidRequest $request, Rental $rental)
+    {
+        try {
+            $validated = $request->validated([]);
+
+            $updatedRental = $this->rentalService->markAsPaid($rental, $validated['notes'] ?? null);
+
+            return $this->success(
+                new RentalResource($updatedRental),
+                __('messages.payment_confirmed_successfully'),
+                200
+            );
+        } catch (\Exception $e) {
+            return $this->error(__('messages.payment_confirmation_failed'), 400, $e->getMessage());
         }
     }
 }

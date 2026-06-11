@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
         // Rental
         Route::apiResource('rentals', PublicRentalController::class)->only('index','show','store');
         Route::patch('rentals/{id}/cancel', [PublicRentalController::class, 'cancel'])->name('rentals.cancel');
+        Route::post('rentals/{rental}/pay-debt', [PublicRentalController::class, 'payDebt'])->name('rentals.pay-debt');
 
         // Admin Panel API
         Route::prefix('admin')->middleware('role:admin')->group(function () {
@@ -78,6 +79,7 @@ Route::prefix('v1')->group(function () {
             Route::post('rentals/{rental}/issue', [RentalController::class, 'issue'])->name('rentals.issue');
             Route::post('rentals/{rental}/return', [RentalController::class, 'processReturn'])->name('rentals.return');
             Route::post('rentals/{rental}/lost', [RentalController::class, 'markLost'])->name('rentals.lost');
+            Route::post('rentals/{rental}/mark-paid', [RentalController::class, 'markPaid'])->name('rentals.mark-paid');
             Route::apiResource('rentals', RentalController::class)->withTrashed(['show','update']);
             
             // Books
