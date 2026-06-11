@@ -80,6 +80,7 @@ Route::prefix('v1')->group(function () {
             Route::post('rentals/{rental}/return', [RentalController::class, 'processReturn'])->name('rentals.return');
             Route::post('rentals/{rental}/lost', [RentalController::class, 'markLost'])->name('rentals.lost');
             Route::post('rentals/{rental}/mark-paid', [RentalController::class, 'markPaid'])->name('rentals.mark-paid');
+            Route::post('rentals/{rental}/cancel', [RentalController::class, 'cancel'])->name('rentals.admin.cancel');
             Route::apiResource('rentals', RentalController::class)->withTrashed(['show','update']);
             
             // Books

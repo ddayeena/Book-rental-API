@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1\Admin;
 
+use App\Enums\PaymentStatus;
 use App\Filters\Admin\RentalFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\v1\Admin\Rental\CancelRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\IssueRentalRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\MarkDebtPaidRequest;
 use App\Http\Requests\Api\v1\Admin\Rental\MarkRentalLostRequest;
@@ -105,6 +107,25 @@ class RentalController extends Controller
     }
 
     /**
+     * Cancel a pending rental order by Admin.
+     */
+    public function cancel(CancelRentalRequest $request, Rental $rental)
+    {
+        $validated = $request->validated([]);
+
+        try {
+            $updatedRental = $this->rentalService->cancelRental($rental, $validated['notes'] ?? null);
+
+            $message = $updatedRental->payment_status === PaymentStatus::REFUNDED
+                ? __('messages.refund_initiated')
+                : __('messages.canceled');
+
+            return $this->success(new RentalResource($updatedRental), $message, 200);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 400);
+        }
+    }
+    /**
      * Mark the rental as active (physically issue the book).
      */
     public function issue(IssueRentalRequest $request, Rental $rental)
@@ -150,13 +171,13 @@ class RentalController extends Controller
             $validated = $request->validated();
 
             $updatedRental = $this->rentalService->markAsLost(
-                $rental, 
+                $rental,
                 $validated['notes'] ?? null,
-                $validated['is_fee_paid'] ?? false 
+                $validated['is_fee_paid'] ?? false
             );
             return $this->success(
                 new RentalResource($updatedRental),
-                __('messages.rental_marked_lost', ['fee' => $updatedRental->late_fee]), 
+                __('messages.rental_marked_lost', ['fee' => $updatedRental->late_fee]),
                 200
             );
         } catch (\Exception $e) {
