@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\UserRole;
+use App\Filters\QueryFilter;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Builder;
 
 #[Fillable([
     'first_name',
@@ -49,5 +51,10 @@ class User extends Authenticatable
     public function rentals(): HasMany
     {
         return $this->hasMany(Rental::class);
+    }
+
+    public function scopeFilter(Builder $builder, QueryFilter $filter): Builder
+    {
+        return $filter->apply($builder);
     }
 }

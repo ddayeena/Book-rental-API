@@ -73,4 +73,18 @@ return [
     'cannot_refund_unpaid'      => 'Cannot refund funds because the rental was not paid.',
     'manual_refund_confirmed'   => 'Funds have been successfully refunded to the client.',
     'refund_successful'         => 'Refund status updated successfully.',
+
+    'email_welcome_subject'      => 'Your account has been created!',
+    'email_welcome_greeting'     => 'Hello, :name!',
+    'email_account_created'      => 'An administrator has created an account for you in our system.',
+    'email_your_credentials'     => 'Your login credentials:',
+    'email_login_button'         => 'Login to Account',
+    'email_change_password_note' => 'For security reasons, we recommend changing this password in your profile settings after your first login.',
+    'user_created_successfully'  => 'User created successfully.',
+
+    'cannot_block_self'                => 'You cannot block your own account.',
+    'cannot_change_own_role'           => 'You cannot change your own role.',
+    'user_blocked_successfully'        => 'User has been successfully blocked.',
+    'user_unblocked_successfully'      => 'User has been successfully unblocked.',
+    'user_role_changed_successfully'   => 'User role has been successfully changed.',
 ];

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
 use App\Http\Controllers\Api\v1\Admin\AuthorController;
 use App\Http\Controllers\Api\v1\Admin\RentalController;
+use App\Http\Controllers\Api\v1\Admin\UserController;
 use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
 use App\Http\Controllers\Api\v1\WebhookController;
 
@@ -73,6 +74,13 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->middleware('role:admin')->group(function () {
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('authors', AuthorController::class);
+
+            Route::prefix('users')->controller(UserController::class)->group(function () {
+                Route::post('{user}/block', 'block')->name('users.block');
+                Route::post('{user}/unblock', 'unblock')->name('users.unblock');
+                Route::post('{user}/change-role', 'changeRole')->name('users.change-role');
+            });
+            Route::apiResource('users', UserController::class);
 
             // Rentals
             Route::prefix('rentals')->controller(RentalController::class)->group(function () {
