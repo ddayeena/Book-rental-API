@@ -24,7 +24,14 @@ class UserResource extends JsonResource
             'role'              => $this->role,
             'is_blocked'        => $this->is_blocked,
             'email_verified_at' => $this->email_verified_at,
-            'rentals'           => RentalListResource::collection($this->whenLoaded('rentals')),
+            'statistics' => [
+                'total_rentals'   => $this->total_rentals_count ?? 0,
+                'active_rentals'  => $this->active_rentals_count ?? 0,
+                'overdue_rentals' => $this->overdue_rentals_count ?? 0,
+                'total_debt'      => (float) ($this->current_penalties_sum ?? 0),
+            ],
+
+            'recent_rentals'    => RentalListResource::collection($this->whenLoaded('rentals')),
             'created_at'        => $this->created_at,
             'is_deleted'        => $this->trashed(), 
             'deleted_at'        => $this->deleted_at ? $this->deleted_at->format('Y-m-d H:i:s') : null,

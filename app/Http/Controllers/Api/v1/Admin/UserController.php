@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Admin;
 
+use App\Enums\RentalStatus;
 use App\Filters\Admin\UserFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\Admin\User\ChangeUserRoleRequest;
@@ -52,7 +53,26 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $user->load('rentals');
+        $user->loadCount([
+            'rentals as total_rentals_count',
+            'rentals as active_rentals_count' => function ($query) {
+                $query->where('status', RentalStatus::ACTIVE);
+            },
+            'rentals as overdue_rentals_count' => function ($query) {
+                $query->where('status', RentalStatus::OVERDUE);
+            },
+        ]);
+
+        $user->loadSum([
+            'rentals as current_penalties_sum' => function ($query) {
+                $query->where('status', RentalStatus::OVERDUE);
+            }
+        ], 'late_fee');
+
+        $user->load(['rentals' => function ($query) {
+            $query->latest()->limit(10)->with('book');
+        }]);
+
         return $this->success(new UserResource($user));
     }
 
@@ -83,7 +103,7 @@ class UserController extends Controller
             $this->userService->deleteUser($user, $request->user()->id);
             return $this->success(null, __('messages.deleted'), 200);
         } catch (\Exception $e) {
-            return $this->error(__('messages.deletion_faied'), 400, $e->getMessage());
+            return $this->error(__('messages.deletion_failed'), 400, $e->getMessage());
         }
     }
 
