@@ -79,8 +79,9 @@ Route::prefix('v1')->group(function () {
                 Route::post('{user}/block', 'block')->name('users.block');
                 Route::post('{user}/unblock', 'unblock')->name('users.unblock');
                 Route::post('{user}/change-role', 'changeRole')->name('users.change-role');
+                Route::post('{user}/restore', 'restore')->name('users.restore')->withTrashed();
             });
-            Route::apiResource('users', UserController::class);
+            Route::apiResource('users', UserController::class)->withTrashed(['show']);
 
             // Rentals
             Route::prefix('rentals')->controller(RentalController::class)->group(function () {

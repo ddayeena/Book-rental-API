@@ -2,7 +2,8 @@
 
 namespace App\Filters\Admin;
 
-use App\Filters\QueryFilter; 
+use App\Filters\QueryFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserFilter extends QueryFilter
 {
@@ -14,9 +15,9 @@ class UserFilter extends QueryFilter
     {
         $this->builder->where(function ($query) use ($value) {
             $query->where('first_name', 'like', "%{$value}%")
-                  ->orWhere('last_name', 'like', "%{$value}%")
-                  ->orWhere('email', 'like', "%{$value}%")
-                  ->orWhere('phone_number', 'like', "%{$value}%");
+                ->orWhere('last_name', 'like', "%{$value}%")
+                ->orWhere('email', 'like', "%{$value}%")
+                ->orWhere('phone_number', 'like', "%{$value}%");
         });
     }
 
@@ -34,7 +35,20 @@ class UserFilter extends QueryFilter
     public function isBlocked(string $value): void
     {
         $isBlocked = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-        
+
         $this->builder->where('is_blocked', $isBlocked);
+    }
+
+    /**
+     * Filter by trashed (deleted) status.
+     * Accessible values: 'with' (all), 'only' (just deleted)
+     */
+    public function trashed(string $value): Builder
+    {
+        return match ($value) {
+            'with'  => $this->builder->withTrashed(),
+            'only'  => $this->builder->onlyTrashed(),
+            default => $this->builder,
+        };
     }
 }

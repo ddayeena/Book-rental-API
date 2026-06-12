@@ -87,4 +87,7 @@ return [
     'user_blocked_successfully'        => 'Користувача успішно заблоковано.',
     'user_unblocked_successfully'      => 'Користувача успішно розблоковано.',
     'user_role_changed_successfully'   => 'Роль користувача успішно змінено.',
+
+    'cannot_delete_self'                         => 'Ви не можете видалити власний акаунт.',
+    'cannot_delete_user_with_active_rentals'     => 'Неможливо видалити користувача, оскільки у нього є активні, очікувані або протерміновані оренди. Спочатку завершіть їх.',
 ];

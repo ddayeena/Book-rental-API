@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'first_name',
@@ -31,7 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasUlids;
+    use HasFactory, Notifiable, HasApiTokens, HasUlids, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.

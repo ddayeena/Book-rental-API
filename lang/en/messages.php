@@ -87,4 +87,7 @@ return [
     'user_blocked_successfully'        => 'User has been successfully blocked.',
     'user_unblocked_successfully'      => 'User has been successfully unblocked.',
     'user_role_changed_successfully'   => 'User role has been successfully changed.',
+
+    'cannot_delete_self'                         => 'You cannot delete your own account.',
+    'cannot_delete_user_with_active_rentals'     => 'Cannot delete user because they have pending, active, or overdue rentals. Please complete them first.',
 ];

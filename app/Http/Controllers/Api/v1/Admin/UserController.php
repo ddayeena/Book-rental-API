@@ -38,8 +38,8 @@ class UserController extends Controller
             $user = $this->userService->createUser($request->validated());
 
             return $this->success(
-                new UserResource($user), 
-                __('messages.created'), 
+                new UserResource($user),
+                __('messages.created'),
                 201
             );
         } catch (\Exception $e) {
@@ -53,7 +53,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         $user->load('rentals');
-        return $this->success(new UserResource($user)); 
+        return $this->success(new UserResource($user));
     }
 
     /**
@@ -65,8 +65,8 @@ class UserController extends Controller
             $updatedUser = $this->userService->updateUser($user, $request->validated());
 
             return $this->success(
-                new UserResource($updatedUser), 
-                __('messages.updated'), 
+                new UserResource($updatedUser),
+                __('messages.updated'),
                 200
             );
         } catch (\Exception $e) {
@@ -77,10 +77,30 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, User $user)
     {
-        //
+        try {
+            $this->userService->deleteUser($user, $request->user()->id);
+            return $this->success(null, __('messages.deleted'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.deletion_faied'), 400, $e->getMessage());
+        }
     }
+
+    /**
+     * Restore a soft-deleted user.
+     */
+    public function restore(User $user)
+    {
+        try {
+            $restoredUser = $this->userService->restoreUser($user);
+
+            return $this->success(new UserResource($restoredUser), __('messages.updated'), 200);
+        } catch (\Exception $e) {
+            return $this->error(__('messages.update_failed'), 400, $e->getMessage());
+        }
+    }
+
 
     public function block(Request $request, User $user)
     {
@@ -88,8 +108,8 @@ class UserController extends Controller
             $updatedUser = $this->userService->blockUser($user, $request->user()->id);
 
             return $this->success(
-                new UserResource($updatedUser), 
-                __('messages.user_blocked_successfully'), 
+                new UserResource($updatedUser),
+                __('messages.user_blocked_successfully'),
                 200
             );
         } catch (\Exception $e) {
@@ -106,8 +126,8 @@ class UserController extends Controller
             $updatedUser = $this->userService->unblockUser($user);
 
             return $this->success(
-                new UserResource($updatedUser), 
-                __('messages.user_unblocked_successfully'), 
+                new UserResource($updatedUser),
+                __('messages.user_unblocked_successfully'),
                 200
             );
         } catch (\Exception $e) {
@@ -122,16 +142,16 @@ class UserController extends Controller
     {
         try {
             $validated = $request->validated();
-            
+
             $updatedUser = $this->userService->changeRole(
-                $user, 
-                $validated['role'], 
+                $user,
+                $validated['role'],
                 $request->user()->id
             );
 
             return $this->success(
-                new UserResource($updatedUser), 
-                __('messages.user_role_changed_successfully'), 
+                new UserResource($updatedUser),
+                __('messages.user_role_changed_successfully'),
                 200
             );
         } catch (\Exception $e) {
