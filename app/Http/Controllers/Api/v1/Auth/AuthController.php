@@ -93,6 +93,10 @@ class AuthController extends Controller
             return $this->error(__('auth.login_failed'), 401);
         }
 
+        if ($user->is_blocked) {
+            return $this->error(__('auth.account_blocked'), 403);
+        }
+        
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success(

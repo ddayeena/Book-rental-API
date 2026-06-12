@@ -26,4 +26,5 @@ return [
     'verify_code_intro'      => 'To complete your account creation, please enter the following verification code in the application:',
     'verify_footer'          => 'This code is valid for 24 hours. If you did not create an account, no further action is required.',
     'verify_code_resent'     => 'The verification code has been resent to your email.',
+    'account_blocked'        => 'Your account has been blocked for violating our terms. Please contact support.',
 ];
