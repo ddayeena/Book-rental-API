@@ -26,6 +26,8 @@ class UserResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'rentals'           => RentalListResource::collection($this->whenLoaded('rentals')),
             'created_at'        => $this->created_at,
+            'is_deleted'        => $this->trashed(), 
+            'deleted_at'        => $this->deleted_at ? $this->deleted_at->format('Y-m-d H:i:s') : null,
         ];
     }
 }

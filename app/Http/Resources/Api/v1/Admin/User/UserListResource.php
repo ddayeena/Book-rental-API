@@ -24,6 +24,7 @@ class UserListResource extends JsonResource
             'is_blocked'        => $this->is_blocked,
             'rentals_count'     => $this->rentals()->count(),
             'created_at'        => $this->created_at,  
+            'is_deleted'        => $this->trashed(),
         ];
     }
 }
