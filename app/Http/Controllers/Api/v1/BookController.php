@@ -27,6 +27,10 @@ class BookController extends Controller
             ->remember($cacheKey, now()->addMinutes(15), function () use ($filter) {
 
                 $books = $this->bookService->getPublicBooks($filter)->apiPaginate();
+
+                $books->loadAvg('reviews', 'rating');
+                $books->loadCount('reviews');
+
                 $response = $this->respondWithPagination(BookListResource::collection($books));
                 return $response->getContent();
             });
@@ -40,9 +44,12 @@ class BookController extends Controller
     public function show(string $id)
     {
         $book = $this->bookService->getPublicBookById($id);
+
+        $book->loadAvg('reviews', 'rating');
+        $book->loadCount('reviews');
+
         return $this->success(new BookResource($book));
     }
-
     /**
      * Display related books for a specific book.
      */

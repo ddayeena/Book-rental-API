@@ -18,7 +18,7 @@ class BookResource extends JsonResource
             'id'               => $this->id,
             'title'            => $this->title,
             'description'      => $this->description,
-            'authors'          => $this->authors->pluck('name'), 
+            'authors'          => $this->authors->pluck('name'),
             'categories'       => $this->categories->pluck('name'),
             'language'         => $this->language?->label(),
             'pages_count'      => $this->pages_count,
@@ -28,6 +28,8 @@ class BookResource extends JsonResource
             'daily_price'      => $this->daily_price,
             'prce'             => $this->price,
             'is_available'     => $this->available_copies > 0,
+            'rating'           => $this->reviews_avg_rating ? round($this->reviews_avg_rating, 1) : 0,
+            'reviews_count'    => $this->reviews_count ?? 0,
         ];
     }
 }
