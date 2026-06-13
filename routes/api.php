@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\v1\Admin\AuthorController;
 use App\Http\Controllers\Api\v1\Admin\RentalController;
 use App\Http\Controllers\Api\v1\Admin\UserController;
 use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
+use App\Http\Controllers\Api\v1\ReviewController as PublicReviewController;
 use App\Http\Controllers\Api\v1\WebhookController;
 
 Route::prefix('v1')->group(function () {
@@ -64,6 +65,8 @@ Route::prefix('v1')->group(function () {
     // Protected API
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        Route::apiResource('reviews', PublicReviewController::class)->except('show');
 
         // Rental
         Route::apiResource('rentals', PublicRentalController::class)->only('index', 'show', 'store');

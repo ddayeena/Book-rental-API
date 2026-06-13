@@ -90,4 +90,12 @@ return [
 
     'cannot_delete_self'                         => 'You cannot delete your own account.',
     'cannot_delete_user_with_active_rentals'     => 'Cannot delete user because they have pending, active, or overdue rentals. Please complete them first.',
+
+    'must_read_to_review'          => 'You can only review books that you have rented and returned.',
+    'review_already_exists'        => 'You have already reviewed this book. You can only edit your existing review.',
+    'review_created_successfully'  => 'Your review has been successfully published!',
+
+    'not_your_review'               => 'You cannot edit or delete someone else\'s review.',
+    'review_updated_successfully'   => 'Your review has been successfully updated.',
+    'review_deleted_successfully'   => 'Your review has been successfully deleted.',
 ];

@@ -21,7 +21,9 @@ class BookListResource extends JsonResource
             'categories'      => $this->categories->pluck('name')->implode(', '),
             'cover_image_url' => $this->cover_image_url,
             'daily_price'     => $this->daily_price,
-            'is_available'    => $this->available_copies > 0, 
+            'is_available'    => $this->available_copies > 0,
+            'rating'          => $this->reviews_avg_rating ? round($this->reviews_avg_rating, 1) : 0,
+            'reviews_count'   => $this->reviews_count ?? 0,
         ];
     }
 }
