@@ -98,4 +98,6 @@ return [
     'not_your_review'               => 'Ви не можете редагувати або видаляти чужий відгук.',
     'review_updated_successfully'   => 'Ваш відгук успішно оновлено.',
     'review_deleted_successfully'   => 'Ваш відгук успішно видалено.',
+
+    'review_replied_successfully'   => 'Вашу відповідь успішно додано до відгуку.',
 ];
