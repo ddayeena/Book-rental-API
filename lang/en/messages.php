@@ -98,4 +98,6 @@ return [
     'not_your_review'               => 'You cannot edit or delete someone else\'s review.',
     'review_updated_successfully'   => 'Your review has been successfully updated.',
     'review_deleted_successfully'   => 'Your review has been successfully deleted.',
+
+    'review_replied_successfully'   => 'Your reply has been successfully added to the review.',
 ];

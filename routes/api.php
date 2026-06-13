@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
 use App\Http\Controllers\Api\v1\Admin\AuthorController;
 use App\Http\Controllers\Api\v1\Admin\RentalController;
+use App\Http\Controllers\Api\v1\Admin\ReviewController;
 use App\Http\Controllers\Api\v1\Admin\UserController;
 use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
 use App\Http\Controllers\Api\v1\ReviewController as PublicReviewController;
@@ -78,6 +79,11 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('authors', AuthorController::class);
 
+            // Review
+            Route::patch('reviews/{review}/reply', [\App\Http\Controllers\Api\v1\Admin\ReviewController::class, 'reply']);
+            Route::apiResource('reviews', ReviewController::class)->only(['index', 'destroy']);
+
+            // Users
             Route::prefix('users')->controller(UserController::class)->group(function () {
                 Route::post('{user}/block', 'block')->name('users.block');
                 Route::post('{user}/unblock', 'unblock')->name('users.unblock');

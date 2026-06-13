@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id',
     'book_id',
     'rating',
-    'comment'
+    'comment',
+    'admin_reply'
 )]
 class Review extends Model
 {
