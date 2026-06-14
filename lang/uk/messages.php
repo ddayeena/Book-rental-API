@@ -100,4 +100,10 @@ return [
     'review_deleted_successfully'   => 'Ваш відгук успішно видалено.',
 
     'review_replied_successfully'   => 'Вашу відповідь успішно додано до відгуку.',
+
+    'rental_expiring_subject'  => 'Нагадування: Термін оренди книги закінчується',
+    'rental_expiring_greeting' => 'Вітаємо, :name!',
+    'rental_expiring_line_1'   => 'Нагадуємо, що завтра (:date) закінчується термін оренди книги:',
+    'rental_expiring_line_2'   => 'Будь ласка, поверніть її вчасно, щоб уникнути блокування чи штрафів.',
+    'rental_expiring_action'   => 'Переглянути мої оренди',
 ];

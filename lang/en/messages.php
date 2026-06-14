@@ -100,4 +100,10 @@ return [
     'review_deleted_successfully'   => 'Your review has been successfully deleted.',
 
     'review_replied_successfully'   => 'Your reply has been successfully added to the review.',
+
+    'rental_expiring_subject'  => 'Reminder: Your book rental is expiring',
+    'rental_expiring_greeting' => 'Hello, :name!',
+    'rental_expiring_line_1'   => 'This is a reminder that your rental period for the following book expires tomorrow (:date):',
+    'rental_expiring_line_2'   => 'Please return it on time to avoid account blocking or late fees.',
+    'rental_expiring_action'   => 'View my rentals',
 ];

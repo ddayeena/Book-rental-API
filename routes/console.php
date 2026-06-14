@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:cancel-expired-rentals')->dailyAt('02:00');
 Schedule::command('app:check-overdue-rentals')->dailyAt('01:00');
+Schedule::command('app:check-expiring-rentals')->dailyAt('08:00');
