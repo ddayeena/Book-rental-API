@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v1\CategoryController as PublicCategoryController;
 use App\Http\Controllers\Api\v1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\v1\AuthorController as PublicAuthorController;
 use App\Http\Controllers\Api\v1\Admin\AuthorController;
+use App\Http\Controllers\Api\v1\Admin\DashboardController;
 use App\Http\Controllers\Api\v1\Admin\RentalController;
 use App\Http\Controllers\Api\v1\Admin\ReviewController;
 use App\Http\Controllers\Api\v1\Admin\UserController;
@@ -78,6 +79,8 @@ Route::prefix('v1')->group(function () {
 
         // Admin Panel API
         Route::prefix('admin')->middleware('role:admin')->group(function () {
+            Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
             Route::apiResource('categories', CategoryController::class);
             Route::apiResource('authors', AuthorController::class);
 
