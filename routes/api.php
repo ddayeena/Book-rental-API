@@ -12,11 +12,13 @@ use App\Http\Controllers\Api\v1\Admin\AuthorController;
 use App\Http\Controllers\Api\v1\Admin\RentalController;
 use App\Http\Controllers\Api\v1\Admin\ReviewController;
 use App\Http\Controllers\Api\v1\Admin\UserController;
+use App\Http\Controllers\Api\v1\HomeController;
 use App\Http\Controllers\Api\v1\RentalController as PublicRentalController;
 use App\Http\Controllers\Api\v1\ReviewController as PublicReviewController;
 use App\Http\Controllers\Api\v1\WebhookController;
 
 Route::prefix('v1')->group(function () {
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     // Auth & Security
     Route::post('register', [AuthController::class, 'register'])->name('register');
