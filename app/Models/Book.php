@@ -77,6 +77,12 @@ class Book extends Model
         return $this->hasMany(Review::class);
     }
 
+    
+    public function rentals(): HasMany
+    {
+        return $this->hasMany(Rental::class);
+    }
+
     protected function coverImageUrl(): Attribute
     {
         return Attribute::make(
